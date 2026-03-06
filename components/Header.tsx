@@ -3,10 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
-const nav = [
-  { href: "/opciones", label: "Opciones" },
-  { href: "/buscar", label: "Buscar vuelos" },
-] as const;
+const nav = [{ href: "/opciones", label: "Opciones" }] as const;
 
 export function Header() {
   const pathname = usePathname();

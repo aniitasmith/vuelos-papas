@@ -105,7 +105,6 @@ app/
   opciones/page.tsx       # página principal (carga datos y FlightApp)
   opciones/loading.tsx    # estado de carga
   opciones/error.tsx      # error boundary de la página Opciones
-  buscar/page.tsx         # buscador Google Flights
   error.tsx               # error boundary global
 components/
   FlightApp.tsx           # orquestador (estado, ranking, persistencia)
@@ -114,8 +113,7 @@ components/
   RouteForm.tsx           # formulario por ruta (tramos + guardar)
   RouteCard.tsx           # tarjeta en el ranking
   LegEditor.tsx           # editor de un tramo (origen, destino, aerolínea, fecha, horas, precio)
-  Header.tsx              # navegación Opciones / Buscar vuelos
-  GoogleFlightsSearch.tsx # enlace a Google Flights con origen/destino/fechas
+  Header.tsx              # navegación (Opciones)
   ui/                     # CurrencyToggle, Pill, InputField, SelectField, ScoreBadge, SaveNotification
 hooks/
   useFlightApp.ts         # useRoutes, useDomestics, useScoredRoutes, usePersist

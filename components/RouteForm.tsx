@@ -61,55 +61,22 @@ export function RouteForm({
   };
 
   return (
-    <div
-      className="glass"
-      style={{
-        width: "100%",
-        padding: "var(--card-padding)",
-        boxSizing: "border-box",
-        borderLeft: "4px solid var(--accent)",
-      }}
-    >
-      <div
-        style={{
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-          marginBottom: "var(--space-lg)",
-        }}
-      >
-        <div style={{ flex: 1, marginRight: "var(--space-lg)" }}>
+    <div className="glass box-border w-full border-0 border-l-4 border-accent p-5">
+      <div className="mb-4 flex items-center justify-between">
+        <div className="mr-4 flex-1">
           <input
             value={route.label}
             onChange={(e) => onUpdateRoute("label", e.target.value)}
             placeholder="Ej: Vía Cancún con Copa"
-            style={{
-              background: "transparent",
-              border: "none",
-              borderBottom: "3px solid var(--accent)",
-              color: "var(--text-primary)",
-              fontSize: 20,
-              fontWeight: 700,
-              outline: "none",
-              width: "100%",
-              paddingBottom: "var(--space-sm)",
-            }}
+            className="w-full border-b-[3px] border-accent bg-transparent pb-2 text-xl font-bold text-text-primary outline-none"
           />
         </div>
-        <div style={{ display: "flex", gap: "var(--space-md)" }}>
+        <div className="flex gap-3">
           <button
             type="button"
             aria-label="Guardar ruta"
             onClick={() => onSave(route)}
-            style={{
-              background: "var(--success-bg)",
-              border: "2px solid var(--success)",
-              borderRadius: "var(--radius-sm)",
-              padding: "var(--btn-padding-y) var(--btn-padding-x)",
-              color: "var(--success)",
-              fontSize: 16,
-              fontWeight: "var(--label-weight)",
-            }}
+            className="rounded-sm border-2 border-success bg-success-bg px-5 py-3 text-base font-semibold text-success"
           >
             💾 Guardar
           </button>
@@ -118,15 +85,7 @@ export function RouteForm({
               type="button"
               aria-label="Eliminar ruta"
               onClick={onDelete}
-              style={{
-                background: "var(--error-bg)",
-                border: "2px solid var(--error)",
-                borderRadius: "var(--radius-sm)",
-                padding: "var(--btn-padding-y) 18px",
-                color: "var(--error)",
-                fontSize: 16,
-                fontWeight: "var(--label-weight)",
-              }}
+              className="rounded-sm border-2 border-error bg-error-bg px-[18px] py-3 text-base font-semibold text-error"
             >
               ✕
             </button>
@@ -135,16 +94,8 @@ export function RouteForm({
       </div>
 
       {domestics.length > 0 && (
-        <div style={{ marginBottom: "var(--space-lg)" }}>
-          <label
-            style={{
-              fontSize: "var(--label-size)",
-              fontWeight: "var(--label-weight)",
-              color: "var(--text-secondary)",
-              display: "block",
-              marginBottom: "var(--space-sm)",
-            }}
-          >
+        <div className="mb-4">
+          <label className="mb-2 block text-sm font-semibold text-text-secondary">
             Trayecto nacional para esta ruta
           </label>
           <select
@@ -152,16 +103,7 @@ export function RouteForm({
             onChange={(e) =>
               onUpdateRoute("domesticId", e.target.value || undefined)
             }
-            style={{
-              background: "var(--bg-card)",
-              border: "2px solid var(--border)",
-              borderRadius: "var(--radius-sm)",
-              padding: "14px 16px",
-              color: "var(--text-primary)",
-              fontSize: "var(--input-font)",
-              outline: "none",
-              width: "100%",
-            }}
+            className="w-full rounded-sm border-2 border-border bg-bg-card px-4 py-3.5 text-base text-text-primary outline-none"
           >
             <option value="">— Ninguno —</option>
             {domestics.map((d) => (
@@ -173,43 +115,29 @@ export function RouteForm({
         </div>
       )}
 
-      <div style={{ marginBottom: "var(--space-lg)" }}>
-        <span style={{ fontSize: 18, color: "var(--accent)", fontWeight: "var(--section-title-weight)" }}>
+      <div className="mb-4">
+        <span className="text-lg font-bold text-accent">
           ✈️ Trayecto internacional · CCS → destino final
         </span>
-        <div style={{ fontSize: 15, color: "var(--text-secondary)", marginTop: "var(--space-xs)" }}>
+        <div className="mt-1.5 text-[15px] text-text-secondary">
           Tramos de vuelo
         </div>
       </div>
 
-      <div style={{ paddingLeft: 4 }}>
+      <div className="pl-1">
         {route.legs.map((leg, legIdx) => (
           <div
             key={leg.id}
             onDragOver={handleDragOver}
             onDrop={(e) => handleDrop(e, legIdx)}
-            style={{ position: "relative" }}
+            className="relative"
           >
             <div
               draggable
               onDragStart={(e) => handleDragStart(e, legIdx)}
               onDragEnd={handleDragEnd}
               title="Arrastrar para reordenar"
-              style={{
-                position: "absolute",
-                top: 12,
-                right: 12,
-                cursor: "grab",
-                padding: "6px 8px",
-                borderRadius: "var(--radius-sm)",
-                background: "var(--bg)",
-                border: "2px solid var(--border)",
-                color: "var(--text-muted)",
-                fontSize: 16,
-                lineHeight: 1,
-                zIndex: 2,
-                userSelect: "none",
-              }}
+              className="absolute right-3 top-3 z-[2] cursor-grab select-none rounded-sm border-2 border-border bg-bg px-2 py-1.5 text-base leading-none text-text-muted"
             >
               ⋮⋮
             </div>
@@ -221,42 +149,22 @@ export function RouteForm({
               onRemove={() => onRemoveLeg(leg.id)}
             />
             {legIdx < route.legs.length - 1 && (
-              <div
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: "var(--space-md)",
-                  marginBottom: "var(--space-xl)",
-                  padding: "var(--space-md) var(--space-lg)",
-                  background: "var(--bg)",
-                  border: "2px dashed var(--border)",
-                  borderRadius: "var(--radius-sm)",
-                  marginLeft: 20,
-                  maxWidth: 280,
-                }}
-              >
-                <span style={{ fontSize: "var(--label-size)", fontWeight: "var(--label-weight)", color: "var(--text-secondary)", whiteSpace: "nowrap" }}>
+              <div className="mb-5 ml-5 flex max-w-[280px] items-center gap-3 rounded-sm border-2 border-dashed border-border bg-bg p-3 px-4">
+                <span className="whitespace-nowrap text-sm font-semibold text-text-secondary">
                   ⏱️ Espera en conexión
                 </span>
                 <input
                   type="number"
                   value={leg.layoverHours}
-                  onChange={(e) => onUpdateLeg(leg.id, "layoverHours", parseFloat(e.target.value) || 0)}
+                  onChange={(e) =>
+                    onUpdateLeg(leg.id, "layoverHours", parseFloat(e.target.value) || 0)
+                  }
                   placeholder="2"
                   min={0}
                   step={0.5}
-                  style={{
-                    width: 72,
-                    padding: "10px 12px",
-                    border: "2px solid var(--border)",
-                    borderRadius: "var(--radius-sm)",
-                    background: "var(--bg-card)",
-                    color: "var(--text-primary)",
-                    fontSize: "var(--input-font)",
-                    outline: "none",
-                  }}
+                  className="w-[72px] rounded-sm border-2 border-border bg-bg-card px-3 py-2.5 text-base text-text-primary outline-none"
                 />
-                <span style={{ fontSize: "var(--label-size)", color: "var(--text-secondary)", fontWeight: 600 }}>h</span>
+                <span className="text-sm font-semibold text-text-secondary">h</span>
               </div>
             )}
           </div>
@@ -268,51 +176,22 @@ export function RouteForm({
           type="button"
           aria-label="Agregar tramo de vuelo"
           onClick={onAddLeg}
-          style={{
-            background: "#dbeafe",
-            border: "2px dashed var(--accent)",
-            borderRadius: "var(--radius-sm)",
-            padding: "var(--btn-padding-y) var(--btn-padding-x)",
-            color: "var(--accent)",
-            fontSize: 16,
-            fontWeight: "var(--label-weight)",
-            width: "100%",
-            marginTop: "var(--space-md)",
-          }}
+          className="mt-3 w-full rounded-sm border-2 border-dashed border-accent bg-blue-100 px-5 py-3 text-base font-semibold text-accent"
         >
           + Agregar tramo
         </button>
       ) : (
-        <p
-          style={{
-            marginTop: "var(--space-md)",
-            fontSize: 14,
-            color: "var(--text-muted)",
-            fontWeight: 600,
-          }}
-        >
+        <p className="mt-3 text-sm font-semibold text-text-muted">
           Máximo {maxLegsPerRoute} tramos por ruta.
         </p>
       )}
 
       {route.legs.some((l) => l.price) && (
-        <div
-          style={{
-            marginTop: "var(--space-lg)",
-            padding: "var(--btn-padding-y) 18px",
-            background: "var(--bg)",
-            borderRadius: "var(--radius-md)",
-            display: "flex",
-            justifyContent: "flex-end",
-            gap: "var(--space-md)",
-            alignItems: "center",
-            border: "2px solid var(--border)",
-          }}
-        >
-          <span style={{ fontSize: 15, fontWeight: "var(--label-weight)", color: "var(--text-secondary)" }}>
+        <div className="mt-4 flex items-center justify-end gap-3 rounded-md border-2 border-border bg-bg py-3 px-[18px]">
+          <span className="text-[15px] font-semibold text-text-secondary">
             Subtotal vuelos
           </span>
-          <span style={{ fontSize: 18, fontWeight: 800, color: "var(--accent)" }}>
+          <span className="text-lg font-extrabold text-accent">
             {fmt(routeTotalCAD(route, exchangeRate), displayCurrency, exchangeRate)}
           </span>
         </div>

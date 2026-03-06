@@ -1,26 +1,8 @@
 export default function OpcionesLoading() {
   return (
-    <div
-      style={{
-        minHeight: "50vh",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        padding: "28px var(--page-padding)",
-      }}
-    >
-      <div
-        style={{
-          textAlign: "center",
-          color: "var(--text-secondary)",
-          fontSize: 18,
-          fontWeight: "var(--label-weight)",
-        }}
-      >
-        <div
-          className="loading-spinner"
-          style={{ margin: "0 auto var(--space-lg)" }}
-        />
+    <div className="flex min-h-[50vh] items-center justify-center px-page py-7">
+      <div className="text-center text-lg font-semibold text-text-secondary">
+        <div className="loading-spinner mx-auto mb-4" />
         Cargando opciones…
       </div>
     </div>

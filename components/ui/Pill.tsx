@@ -15,39 +15,19 @@ export function Pill({
   warn?: boolean;
   dim?: boolean;
 }) {
+  const base = "rounded-full px-3.5 py-1.5 text-sm font-semibold whitespace-nowrap border-2";
+  const variant = green
+    ? "border-success bg-success-bg text-success"
+    : warn
+      ? "border-warn bg-warn-bg text-warn"
+      : accent
+        ? "border-accent bg-blue-100 text-accent"
+        : dim
+          ? "border-border bg-slate-100 text-text-muted"
+          : "border-border bg-slate-100 text-text-secondary";
+
   return (
-    <span
-      style={{
-        background: green
-          ? "var(--success-bg)"
-          : warn
-            ? "var(--warn-bg)"
-            : accent
-              ? "#dbeafe"
-              : "#f1f5f9",
-        border: green
-          ? "2px solid var(--success)"
-          : warn
-            ? "2px solid var(--warn)"
-            : accent
-              ? "2px solid var(--accent)"
-              : "2px solid var(--border)",
-        color: dim
-          ? "var(--text-muted)"
-          : green
-            ? "var(--success)"
-            : warn
-              ? "var(--warn)"
-              : accent
-                ? "var(--accent)"
-                : "var(--text-secondary)",
-        borderRadius: 999,
-        padding: "6px 14px",
-        fontSize: 14,
-        fontWeight: 600,
-        whiteSpace: "nowrap" as const,
-      }}
-    >
+    <span className={`${base} ${variant}`}>
       {icon} {label}
     </span>
   );

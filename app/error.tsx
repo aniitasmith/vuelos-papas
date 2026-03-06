@@ -14,51 +14,18 @@ export default function Error({
   }, [error]);
 
   return (
-    <div
-      style={{
-        minHeight: "50vh",
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "center",
-        justifyContent: "center",
-        padding: "28px var(--page-padding)",
-        textAlign: "center",
-      }}
-    >
-      <h2
-        style={{
-          color: "var(--text-primary)",
-          fontSize: 24,
-          fontWeight: 800,
-          marginBottom: "var(--space-md)",
-        }}
-      >
+    <div className="flex min-h-[50vh] flex-col items-center justify-center px-page py-7 text-center">
+      <h2 className="mb-3 text-2xl font-extrabold text-text-primary">
         Algo salió mal
       </h2>
-      <p
-        style={{
-          color: "var(--text-secondary)",
-          fontSize: 16,
-          marginBottom: "var(--space-xl)",
-          maxWidth: 400,
-        }}
-      >
+      <p className="mb-5 max-w-[400px] text-base text-text-secondary">
         {error.message || "Ocurrió un error inesperado. Probá de nuevo."}
       </p>
       <button
         type="button"
         onClick={reset}
         aria-label="Reintentar"
-        style={{
-          background: "var(--accent)",
-          color: "#fff",
-          border: "none",
-          borderRadius: "var(--radius-sm)",
-          padding: "var(--btn-padding-y) var(--btn-padding-x)",
-          fontSize: 16,
-          fontWeight: 700,
-          cursor: "pointer",
-        }}
+        className="cursor-pointer rounded-sm border-none bg-accent px-5 py-3 text-base font-bold text-white"
       >
         Reintentar
       </button>

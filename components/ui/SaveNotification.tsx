@@ -25,68 +25,39 @@ export function SaveNotification({
     !context ? "guardados" : context === "domestic" ? "guardado" : "guardada";
 
   const messages: Record<Exclude<Status, "idle">, string> = {
-    pending: "", // no se muestra; solo saving/saved/error
+    pending: "",
     saving: `Guardando ${label.toLowerCase()}...`,
     saved: `${label} ${savedVerb}`,
     error: errorMessage || `Error al guardar ${label.toLowerCase()}`,
   };
 
-  const styles: Record<Exclude<Status, "idle">, { bg: string; border: string; color: string; icon: string }> = {
-    pending: { bg: "", border: "", color: "", icon: "" },
-    saving: {
-      bg: "var(--warn-bg)",
-      border: "var(--warn)",
-      color: "var(--warn)",
-      icon: "💾",
-    },
-    saved: {
-      bg: "var(--success-bg)",
-      border: "var(--success)",
-      color: "var(--success)",
-      icon: "✓",
-    },
-    error: {
-      bg: "var(--error-bg)",
-      border: "var(--error)",
-      color: "var(--error)",
-      icon: "✕",
-    },
+  const styleMap: Record<"saving" | "saved" | "error", string> = {
+    saving: "bg-warn-bg border-warn text-warn",
+    saved: "bg-success-bg border-success text-success",
+    error: "bg-error-bg border-error text-error",
+  };
+  const icons: Record<Exclude<Status, "idle">, string> = {
+    pending: "",
+    saving: "💾",
+    saved: "✓",
+    error: "✕",
   };
 
-  const { bg, border, color, icon } = styles[status];
   const text = messages[status];
+  const icon = icons[status];
+  const styleClass = status === "saving" || status === "saved" || status === "error" ? styleMap[status] : "";
 
   return (
     <div
       role="status"
       aria-live="polite"
       aria-atomic="true"
-      style={{
-        position: "fixed",
-        top: "var(--header-height)",
-        right: "var(--page-padding)",
-        zIndex: 1000,
-        pointerEvents: "none",
-      }}
+      className="fixed right-[var(--page-padding)] top-[var(--header-height)] z-[1000] pointer-events-none"
     >
       <div
-        className="save-notification-enter glass"
-        style={{
-          padding: "var(--space-sm) var(--space-md)",
-          background: bg,
-          border: `2px solid ${border}`,
-          borderRadius: "var(--radius-sm)",
-          boxShadow: "var(--shadow-md)",
-          display: "flex",
-          alignItems: "center",
-          gap: "var(--space-sm)",
-          fontSize: 13,
-          fontWeight: 600,
-          color,
-          maxWidth: 280,
-        }}
+        className={`save-notification-enter glass flex max-w-[280px] items-center gap-2 rounded-sm border-2 p-2 px-4 text-[13px] font-semibold shadow-card ${styleClass}`}
       >
-        <span style={{ fontSize: 14 }} aria-hidden>
+        <span className="text-sm" aria-hidden>
           {icon}
         </span>
         <span>{text}</span>

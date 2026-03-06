@@ -10,30 +10,15 @@ export function CurrencyToggle({
   onChange: (v: Currency) => void;
 }) {
   return (
-    <div
-      style={{
-        display: "flex",
-        width: "fit-content",
-        minWidth: 100,
-        border: "2px solid var(--border)",
-        borderRadius: "var(--radius-sm)",
-        overflow: "hidden",
-        background: "var(--bg-card)",
-      }}
-    >
+    <div className="flex min-w-[100px] w-fit overflow-hidden rounded-sm border-2 border-border bg-bg-card">
       {(["USD", "CAD"] as Currency[]).map((c) => (
         <button
           key={c}
+          type="button"
           onClick={() => onChange(c)}
-          style={{
-            flex: "1 1 0",
-            minWidth: 50,
-            padding: "var(--btn-padding-y) 12px",
-            fontSize: 15,
-            fontWeight: 600,
-            background: value === c ? "var(--accent)" : "transparent",
-            color: value === c ? "#fff" : "var(--text-secondary)",
-          }}
+          className={`min-w-[50px] flex-1 px-3 py-3 text-sm font-semibold ${
+            value === c ? "bg-accent text-white" : "bg-transparent text-text-secondary"
+          }`}
         >
           {c}
         </button>

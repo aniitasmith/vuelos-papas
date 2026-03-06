@@ -1,23 +1,11 @@
 "use client";
 
 export function ScoreBadge({ score }: { score: number }) {
-  const color =
-    score >= 80 ? "var(--success)" : score >= 60 ? "var(--warn)" : "var(--error)";
+  const colorClass =
+    score >= 80 ? "bg-success" : score >= 60 ? "bg-warn" : "bg-error";
   return (
     <div
-      style={{
-        background: color,
-        color: "#fff",
-        borderRadius: "50%",
-        width: 56,
-        height: 56,
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        fontWeight: 800,
-        fontSize: 20,
-        flexShrink: 0,
-      }}
+      className={`flex h-14 w-14 flex-shrink-0 items-center justify-center rounded-full text-xl font-extrabold text-white ${colorClass}`}
     >
       {score}
     </div>

@@ -47,85 +47,46 @@ export function RouteCard({
 
   return (
     <div
-      className="glass"
-      style={{
-        width: "100%",
-        background: "var(--bg-card)",
-        border: isTop ? "3px solid var(--success)" : "2px solid var(--border)",
-        borderRadius: "var(--radius-md)",
-        padding: "var(--card-padding)",
-        position: "relative",
-        overflow: "hidden",
-        boxSizing: "border-box",
-      }}
+      className={`glass relative w-full overflow-hidden rounded-md p-5 box-border ${
+        isTop ? "border-[3px] border-success" : "border-2 border-border"
+      }`}
     >
       {isTop && (
-        <div
-          style={{
-            position: "absolute",
-            top: 0,
-            right: 0,
-            background: "var(--success)",
-            color: "#fff",
-            fontSize: "var(--section-title-size)",
-            fontWeight: 800,
-            padding: "var(--space-sm) 18px",
-            borderBottomLeftRadius: "var(--radius-sm)",
-          }}
-        >
+        <div className="absolute right-0 top-0 rounded-bl-sm bg-success px-[18px] py-2 text-sm font-extrabold text-white">
           Mejor opción
         </div>
       )}
 
-      <div style={{ display: "flex", gap: "var(--space-xl)", alignItems: "flex-start" }}>
-        <div
-          style={{
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
-            gap: 8,
-            minWidth: 56,
-          }}
-        >
-          <span style={{ fontSize: rank <= 3 ? 28 : 18, fontWeight: 700, color: "var(--text-secondary)" }}>
+      <div className="flex items-start gap-5">
+        <div className="flex min-w-[56px] flex-col items-center gap-2">
+          <span
+            className={`font-bold text-text-secondary ${
+              rank <= 3 ? "text-[28px]" : "text-lg"
+            }`}
+          >
             {rank <= 3 ? medals[rank - 1] : `#${rank}`}
           </span>
           <ScoreBadge score={score} />
         </div>
 
-        <div style={{ flex: 1, minWidth: 0 }}>
-          <div
-            style={{
-              display: "flex",
-              justifyContent: "space-between",
-              alignItems: "flex-start",
-              flexWrap: "wrap",
-              gap: 8,
-            }}
-          >
+        <div className="min-w-0 flex-1">
+          <div className="flex flex-wrap items-start justify-between gap-2">
             <div>
-              <div style={{ fontSize: 22, fontWeight: 800, color: "var(--text-primary)" }}>
+              <div className="text-[22px] font-extrabold text-text-primary">
                 {route.label || "Sin nombre"}
               </div>
-              <div style={{ fontSize: 16, color: "var(--accent)", fontWeight: 600, marginTop: 4 }}>
+              <div className="mt-1 text-base font-semibold text-accent">
                 ✈️ {path}
               </div>
             </div>
             {addedDate && (
-              <span style={{ fontSize: 14, color: "var(--text-muted)", fontWeight: 600 }}>
+              <span className="text-sm font-semibold text-text-muted">
                 agregado {addedDate}
               </span>
             )}
           </div>
 
-          <div
-            style={{
-              display: "flex",
-              gap: 6,
-              flexWrap: "wrap" as const,
-              marginTop: 10,
-            }}
-          >
+          <div className="mt-2.5 flex flex-wrap gap-1.5">
             <Pill icon="🔗" label={`${stops} conexión(es)`} />
             <Pill icon="✈️" label={`${route.legs.length} tramo(s)`} />
             <Pill icon="⏱" label={`${totalHours.toFixed(1)}h total`} accent />
@@ -143,14 +104,7 @@ export function RouteCard({
             )}
           </div>
 
-          <div
-            style={{
-              display: "flex",
-              gap: 6,
-              flexWrap: "wrap" as const,
-              marginTop: 6,
-            }}
-          >
+          <div className="mt-1.5 flex flex-wrap gap-1.5">
             {route.legs.map((l, i) => (
               <Pill
                 key={l.id}
@@ -170,67 +124,55 @@ export function RouteCard({
           </div>
 
           <button
+            type="button"
             onClick={() => setExpanded((e) => !e)}
-            style={{
-              marginTop: "var(--space-lg)",
-              background: "#dbeafe",
-              border: "2px solid var(--accent)",
-              borderRadius: "var(--radius-sm)",
-              padding: "var(--btn-padding-y) 18px",
-              color: "var(--accent)",
-              fontSize: 15,
-              fontWeight: "var(--label-weight)",
-            }}
+            className="mt-4 rounded-sm border-2 border-accent bg-blue-100 px-[18px] py-3 text-[15px] font-semibold text-accent"
           >
             {expanded ? "▲ Ocultar detalle" : "▼ Ver detalle de tramos"}
           </button>
 
           {expanded && (
-            <div
-              style={{
-                marginTop: "var(--space-md)",
-                borderTop: "2px solid var(--border)",
-                paddingTop: "var(--space-md)",
-              }}
-            >
+            <div className="mt-3 border-t-2 border-border pt-3">
               {route.legs.map((l, i) => (
                 <div
                   key={l.id}
-                  style={{
-                    marginBottom: 10,
-                    paddingLeft: 12,
-                    borderLeft: "3px solid var(--accent)",
-                  }}
+                  className="mb-2.5 border-l-[3px] border-accent pl-3"
                 >
-                  <div style={{ fontSize: 15, fontWeight: 600, color: "var(--accent)", marginBottom: 6 }}>
+                  <div className="mb-1.5 text-[15px] font-semibold text-accent">
                     Tramo {i + 1}: {l.origin || "?"} → {l.destination || "?"}
                     {l.airline && (
-                      <span style={{ color: "var(--text-secondary)" }}> · {l.airline}</span>
+                      <span className="text-text-secondary"> · {l.airline}</span>
                     )}
                   </div>
                   {(l.date || l.time || l.timeArrival) && (
-                    <div style={{ fontSize: 14, color: "var(--text-secondary)", marginBottom: 6 }}>
-                      📅 {l.date ? new Date(l.date + "T12:00:00").toLocaleDateString("es-VE", { weekday: "short", day: "numeric", month: "short" }) : ""}
-                      {(l.date && (l.time || l.timeArrival)) ? " · " : ""}
-                      {l.time && l.timeArrival ? `🕐 Salida ${l.time} → Llegada ${l.timeArrival}` : l.time ? `🕐 Salida ${l.time}` : l.timeArrival ? `🕐 Llegada ${l.timeArrival}` : ""}
+                    <div className="mb-1.5 text-sm text-text-secondary">
+                      📅{" "}
+                      {l.date
+                        ? new Date(l.date + "T12:00:00").toLocaleDateString(
+                            "es-VE",
+                            {
+                              weekday: "short",
+                              day: "numeric",
+                              month: "short",
+                            }
+                          )
+                        : ""}
+                      {l.date && (l.time || l.timeArrival) ? " · " : ""}
+                      {l.time && l.timeArrival
+                        ? `🕐 Salida ${l.time} → Llegada ${l.timeArrival}`
+                        : l.time
+                          ? `🕐 Salida ${l.time}`
+                          : l.timeArrival
+                            ? `🕐 Llegada ${l.timeArrival}`
+                            : ""}
                     </div>
                   )}
-                  <div
-                    style={{
-                      display: "flex",
-                      gap: 6,
-                      flexWrap: "wrap" as const,
-                    }}
-                  >
+                  <div className="flex flex-wrap gap-1.5">
                     {l.flightHours > 0 && (
                       <Pill icon="🕐" label={`${l.flightHours}h vuelo`} />
                     )}
                     {l.layoverHours > 0 && (
-                      <Pill
-                        icon="⏳"
-                        label={`${l.layoverHours}h espera`}
-                        accent
-                      />
+                      <Pill icon="⏳" label={`${l.layoverHours}h espera`} accent />
                     )}
                     {l.price && (
                       <Pill
@@ -245,7 +187,7 @@ export function RouteCard({
                     )}
                   </div>
                   {l.notes && (
-                    <div style={{ marginTop: 6, fontSize: 14, color: "var(--text-muted)", fontStyle: "italic" }}>
+                    <div className="mt-1.5 text-sm italic text-text-muted">
                       {l.notes}
                     </div>
                   )}
@@ -253,26 +195,18 @@ export function RouteCard({
               ))}
 
               {domestic?.price && (
-                <div
-                  style={{
-                    marginTop: 8,
-                    paddingLeft: 12,
-                    borderLeft: "3px solid var(--warn)",
-                  }}
-                >
-                  <div style={{ fontSize: 15, fontWeight: 600, color: "var(--warn)", marginBottom: 6 }}>
+                <div className="mt-2 border-l-[3px] border-warn pl-3">
+                  <div className="mb-1.5 text-[15px] font-semibold text-warn">
                     Nacional: {domestic.cityOrigin || "Ciudad"} → CCS ·{" "}
                     {domestic.transport}
                   </div>
-                  <div
-                    style={{
-                      display: "flex",
-                      gap: 6,
-                      flexWrap: "wrap" as const,
-                    }}
-                  >
+                  <div className="flex flex-wrap gap-1.5">
                     {domestic.durationHours > 0 && (
-                      <Pill icon="⏱" label={`${domestic.durationHours}h`} accent />
+                      <Pill
+                        icon="⏱"
+                        label={`${domestic.durationHours}h`}
+                        accent
+                      />
                     )}
                     <Pill
                       icon="💵"
@@ -285,21 +219,11 @@ export function RouteCard({
             </div>
           )}
 
-          <div
-            style={{
-              marginTop: "var(--space-xl)",
-              paddingTop: "var(--space-lg)",
-              borderTop: "2px solid var(--border)",
-              display: "flex",
-              justifyContent: "flex-end",
-              alignItems: "center",
-              gap: "var(--space-md)",
-            }}
-          >
-            <span style={{ fontSize: 16, fontWeight: "var(--section-title-weight)", color: "var(--text-secondary)" }}>
+          <div className="mt-5 flex items-center justify-end gap-3 border-t-2 border-border pt-4">
+            <span className="text-base font-bold text-text-secondary">
               Total
             </span>
-            <span style={{ fontSize: 24, fontWeight: 800, color: "var(--success)" }}>
+            <span className="text-2xl font-extrabold text-success">
               {fmt(grandTotalCAD, displayCurrency, exchangeRate)}
             </span>
           </div>

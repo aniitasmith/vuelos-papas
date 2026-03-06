@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback, useRef } from "react";
 import { AppData, Currency, Priority } from "@/lib/types";
-import { fmt, emptyRoute, emptyDomestic } from "@/lib/flightUtils";
+import { fmt } from "@/lib/flightUtils";
 import { useRoutes } from "@/hooks/useFlightApp";
 import { useDomestics } from "@/hooks/useFlightApp";
 import { useScoredRoutes } from "@/hooks/useFlightApp";
@@ -133,60 +133,21 @@ export default function FlightApp({ initialData }: { initialData: AppData }) {
     saveStatus !== "idle" ? saveContext : configSaveStatus !== "idle" ? "config" : null;
 
   return (
-    <div
-      style={{
-        minHeight: "100vh",
-        padding: "28px var(--page-padding)",
-        width: "100%",
-        boxSizing: "border-box",
-      }}
-    >
+    <div className="min-h-screen w-full box-border px-page py-7">
       <SaveNotification
         status={effectiveSaveStatus}
         errorMessage={effectiveErrorMessage}
         context={effectiveSaveContext}
       />
-      <div
-        style={{
-          width: "100%",
-          maxWidth: "var(--max-width)",
-          margin: "0 auto",
-        }}
-      >
-        <div
-          style={{
-            textAlign: "center",
-            marginBottom: "var(--space-2xl)",
-          }}
-        >
-          <div
-            style={{
-              fontSize: 16,
-              color: "var(--accent)",
-              fontWeight: 700,
-              marginBottom: 8,
-            }}
-          >
+      <div className="mx-auto w-full max-w-content">
+        <div className="mb-6 text-center">
+          <div className="mb-2 text-base font-bold text-accent">
             Comparador de rutas
           </div>
-          <h1
-            style={{
-              fontSize: 36,
-              margin: 0,
-              color: "var(--text-primary)",
-              fontWeight: 800,
-            }}
-          >
+          <h1 className="m-0 text-4xl font-extrabold text-text-primary">
             ✈️ Vuelos para papás
           </h1>
-          <p
-            style={{
-              color: "var(--text-secondary)",
-              marginTop: "var(--space-md)",
-              fontSize: 18,
-              fontWeight: "var(--label-weight)",
-            }}
-          >
+          <p className="mt-3 text-lg font-semibold text-text-secondary">
             Caracas (CCS) → Toronto (YYZ)
           </p>
         </div>
@@ -200,37 +161,15 @@ export default function FlightApp({ initialData }: { initialData: AppData }) {
           setExchangeRate={setExchangeRate}
         />
 
-        <div
-          style={{
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center",
-            marginBottom: "var(--space-lg)",
-          }}
-        >
-          <h2
-            style={{
-              color: "var(--text-primary)",
-              margin: 0,
-              fontSize: 24,
-              fontWeight: 800,
-            }}
-          >
+        <div className="mb-4 flex items-center justify-between">
+          <h2 className="m-0 text-2xl font-extrabold text-text-primary">
             Ingresar opciones
           </h2>
           <button
             type="button"
             onClick={() => setShowForm((s) => !s)}
             aria-label={showForm ? "Ocultar formulario de opciones" : "Mostrar formulario de opciones"}
-            style={{
-              background: "var(--bg-card)",
-              border: "2px solid var(--border)",
-              borderRadius: "var(--radius-sm)",
-              padding: "var(--btn-padding-y) var(--btn-padding-x)",
-              color: "var(--accent)",
-              fontSize: 16,
-              fontWeight: "var(--label-weight)",
-            }}
+            className="rounded-sm border-2 border-border bg-bg-card px-5 py-3 text-base font-semibold text-accent"
           >
             {showForm ? "▲ Ocultar" : "▼ Mostrar"}
           </button>
@@ -248,15 +187,7 @@ export default function FlightApp({ initialData }: { initialData: AppData }) {
               onToggleCollapse={() => setShowDomesticSection((s) => !s)}
             />
 
-            <div
-              style={{
-                width: "100%",
-                display: "flex",
-                flexDirection: "column" as const,
-                gap: "var(--space-lg)",
-                marginBottom: "var(--space-xl)",
-              }}
-            >
+            <div className="mb-5 flex w-full flex-col gap-4">
               {routes.map((route) => (
                 <RouteForm
                   key={route.id}
@@ -286,15 +217,7 @@ export default function FlightApp({ initialData }: { initialData: AppData }) {
               ))}
 
               {routes.length >= MAX_ROUTES ? (
-                <p
-                  style={{
-                    padding: "var(--space-md) var(--space-xl)",
-                    color: "var(--text-muted)",
-                    fontSize: 15,
-                    fontWeight: 600,
-                    margin: 0,
-                  }}
-                >
+                <p className="m-0 px-5 py-3 text-[15px] font-semibold text-text-muted">
                   Máximo {MAX_ROUTES} rutas. Eliminá una para agregar otra.
                 </p>
               ) : (
@@ -302,15 +225,7 @@ export default function FlightApp({ initialData }: { initialData: AppData }) {
                   type="button"
                   onClick={addRoute}
                   aria-label="Agregar otra ruta"
-                  style={{
-                    background: "#dbeafe",
-                    border: "2px dashed var(--accent)",
-                    borderRadius: "var(--radius-md)",
-                    padding: "var(--space-xl)",
-                    color: "var(--accent)",
-                    fontSize: 18,
-                    fontWeight: 700,
-                  }}
+                  className="rounded-md border-2 border-dashed border-accent bg-blue-100 p-5 text-lg font-bold text-accent"
                 >
                   + Agregar otra ruta
                 </button>
@@ -320,65 +235,21 @@ export default function FlightApp({ initialData }: { initialData: AppData }) {
         )}
 
         {scored.length > 0 && (
-          <div style={{ width: "100%" }}>
-            <div
-              style={{
-                width: "100%",
-                borderTop: "2px solid var(--border)",
-                paddingTop: "var(--space-2xl)",
-                marginBottom: "var(--space-xl)",
-              }}
-            >
-              <h2
-                style={{
-                  color: "var(--text-primary)",
-                  margin: 0,
-                  fontSize: 26,
-                  fontWeight: 800,
-                }}
-              >
+          <div className="w-full">
+            <div className="mb-5 w-full border-t-2 border-border pt-6">
+              <h2 className="m-0 text-[26px] font-extrabold text-text-primary">
                 🏆 Ranking de rutas
               </h2>
             </div>
 
-            <div
-              className="glass"
-              style={{
-                width: "100%",
-                background: "var(--success-bg)",
-                border: "3px solid var(--success)",
-                padding: "var(--card-padding)",
-                marginBottom: "var(--space-xl)",
-                boxSizing: "border-box",
-              }}
-            >
-              <div
-                style={{
-                  fontSize: "var(--section-title-size)",
-                  color: "var(--success)",
-                  fontWeight: "var(--section-title-weight)",
-                }}
-              >
+            <div className="glass mb-5 box-border w-full border-[3px] border-success bg-success-bg p-5">
+              <div className="text-sm font-bold text-success">
                 Recomendación
               </div>
-              <div
-                style={{
-                  fontSize: 24,
-                  color: "var(--text-primary)",
-                  fontWeight: 800,
-                  marginTop: "var(--space-xs)",
-                }}
-              >
+              <div className="mt-1.5 text-2xl font-extrabold text-text-primary">
                 {scored[0].route.label || "Ruta 1"}
               </div>
-              <div
-                style={{
-                  fontSize: 16,
-                  color: "var(--text-secondary)",
-                  marginTop: "var(--space-xs)",
-                  fontWeight: "var(--label-weight)",
-                }}
-              >
+              <div className="mt-1.5 text-base font-semibold text-text-secondary">
                 {[
                   scored[0].route.legs[0]?.origin,
                   ...scored[0].route.legs.map((l) => l.destination),
@@ -396,14 +267,7 @@ export default function FlightApp({ initialData }: { initialData: AppData }) {
               </div>
             </div>
 
-            <div
-              style={{
-                width: "100%",
-                display: "flex",
-                flexDirection: "column" as const,
-                gap: "var(--space-md)",
-              }}
-            >
+            <div className="flex w-full flex-col gap-3">
               {scored.map((c, i) => (
                 <RouteCard
                   key={c.route.id}
@@ -418,53 +282,25 @@ export default function FlightApp({ initialData }: { initialData: AppData }) {
               ))}
             </div>
 
-            <div
-              className="glass"
-              style={{
-                width: "100%",
-                marginTop: "var(--space-2xl)",
-                padding: "var(--card-padding)",
-                boxSizing: "border-box",
-              }}
-            >
-              <p
-                style={{
-                  margin: 0,
-                  fontSize: 16,
-                  color: "var(--text-secondary)",
-                  lineHeight: 1.8,
-                  fontWeight: "var(--label-weight)",
-                }}
-              >
+            <div className="glass mt-6 box-border w-full p-5">
+              <p className="m-0 text-base font-semibold leading-[1.8] text-text-secondary">
                 💱 Tasa:{" "}
-                <strong style={{ color: "var(--accent)" }}>
-                  1 USD = {exchangeRate} CAD
-                </strong>{" "}
+                <strong className="text-accent">1 USD = {exchangeRate} CAD</strong>{" "}
                 · Actualizala en la barra de arriba.
                 <br />
                 💾 Los datos persisten en la nube — podés volver mañana y seguir
                 comparando.
                 <br />
                 💡 Para adultos mayores considerá{" "}
-                <strong style={{ color: "var(--success)" }}>
-                  🛋️ Comodidad
-                </strong>{" "}
-                — menos conexiones = menos estrés.
+                <strong className="text-success">🛋️ Comodidad</strong> — menos
+                conexiones = menos estrés.
               </p>
             </div>
           </div>
         )}
 
         {scored.length === 0 && (
-          <div
-            style={{
-              textAlign: "center",
-              padding: "48px var(--space-2xl)",
-              color: "var(--text-muted)",
-              fontSize: 18,
-              fontWeight: "var(--label-weight)",
-            }}
-          >
+          <div className="py-12 px-6 text-center text-lg font-semibold text-text-muted">
             ↑ Completá y guardá al menos una ruta con precio para ver el ranking
           </div>
         )}

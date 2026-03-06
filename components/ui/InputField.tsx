@@ -19,20 +19,13 @@ export function InputField({
   min?: string;
   step?: string;
   small?: boolean;
-  /** When true, appends * to the label to indicate the field is required */
   required?: boolean;
 }) {
   return (
-    <div style={{ display: "flex", flexDirection: "column", gap: "var(--space-xs)" }}>
-      <label
-        style={{
-          fontSize: "var(--label-size)",
-          fontWeight: "var(--label-weight)",
-          color: "var(--text-secondary)",
-        }}
-      >
+    <div className="flex flex-col gap-1.5">
+      <label className="text-sm font-semibold text-text-secondary">
         {label}
-        {required && <span style={{ color: "var(--error)" }}> *</span>}
+        {required && <span className="text-error"> *</span>}
       </label>
       <input
         type={type}
@@ -43,16 +36,9 @@ export function InputField({
         placeholder={placeholder}
         min={min}
         step={step}
-        style={{
-          background: "var(--bg-card)",
-          border: "2px solid var(--border)",
-          borderRadius: "var(--radius-sm)",
-          padding: small ? "12px 14px" : "14px 16px",
-          color: "var(--text-primary)",
-          fontSize: "var(--input-font)",
-          outline: "none",
-          width: "100%",
-        }}
+        className={`w-full rounded-sm border-2 border-border bg-bg-card text-base text-text-primary outline-none [font-family:inherit] [&::-webkit-inner-spin-button]:appearance-none ${
+          small ? "px-3.5 py-3" : "px-4 py-3.5"
+        }`}
       />
     </div>
   );

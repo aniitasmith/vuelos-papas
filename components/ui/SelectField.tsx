@@ -11,34 +11,18 @@ export function SelectField({
   value: string;
   onChange: (v: string) => void;
   options: string[];
-  /** When true, appends * to the label to indicate the field is required */
   required?: boolean;
 }) {
   return (
-    <div style={{ display: "flex", flexDirection: "column", gap: "var(--space-xs)" }}>
-      <label
-        style={{
-          fontSize: "var(--label-size)",
-          fontWeight: "var(--label-weight)",
-          color: "var(--text-secondary)",
-        }}
-      >
+    <div className="flex flex-col gap-1.5">
+      <label className="text-sm font-semibold text-text-secondary">
         {label}
-        {required && <span style={{ color: "var(--error)" }}> *</span>}
+        {required && <span className="text-error"> *</span>}
       </label>
       <select
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        style={{
-          background: "var(--bg-card)",
-          border: "2px solid var(--border)",
-          borderRadius: "var(--radius-sm)",
-          padding: "14px 16px",
-          color: "var(--text-primary)",
-          fontSize: "var(--input-font)",
-          outline: "none",
-          width: "100%",
-        }}
+        className="w-full rounded-sm border-2 border-border bg-bg-card px-4 py-3.5 text-base text-text-primary outline-none"
       >
         {options.map((o) => (
           <option key={o} value={o}>

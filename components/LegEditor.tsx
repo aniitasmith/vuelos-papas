@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import type { Leg } from "@/lib/types";
 import { flightHoursFromTimes } from "@/lib/flightUtils";
 import { InputField } from "./ui/InputField";
@@ -25,71 +25,49 @@ export function LegEditor({
   const calculatedHours = flightHoursFromTimes(dep, arr);
   const hasBothTimes = Boolean(dep && arr);
 
+  const onChangeRef = useRef(onChange);
+  onChangeRef.current = onChange;
+
   useEffect(() => {
     if (hasBothTimes && calculatedHours !== null) {
-      onChange("flightHours", calculatedHours);
+      onChangeRef.current("flightHours", calculatedHours);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- omit onChange to avoid loops when parent re-renders
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- only sync flightHours from times
   }, [dep, arr, hasBothTimes, calculatedHours]);
+
+  const badgeStyle =
+    idx === 0
+      ? "border-success bg-success-bg text-success"
+      : isLast
+        ? "border-accent bg-blue-100 text-accent"
+        : "border-warn bg-warn-bg text-warn";
+
   return (
-    <div style={{ position: "relative" }}>
+    <div className="relative">
       {!isLast && (
         <div
+          className="absolute left-5 -bottom-[18px] z-[1] h-[18px] w-0.5 opacity-40"
           style={{
-            position: "absolute",
-            left: 20,
-            bottom: -18,
-            width: 2,
-            height: 18,
             background: "linear-gradient(var(--accent), var(--text-muted))",
-            opacity: 0.4,
-            zIndex: 1,
           }}
         />
       )}
-      <div
-        className="glass"
-        style={{
-          padding: "var(--card-padding)",
-          marginBottom: "var(--space-xl)",
-        }}
-      >
-        <div style={{ display: "flex", alignItems: "center", gap: "var(--space-md)", marginBottom: "var(--space-lg)" }}>
+      <div className="glass mb-5 p-5">
+        <div className="mb-4 flex items-center gap-3">
           <div
-            style={{
-              width: 36,
-              height: 36,
-              borderRadius: "50%",
-              background:
-                idx === 0 ? "var(--success-bg)" : isLast ? "#dbeafe" : "var(--warn-bg)",
-              border: `2px solid ${idx === 0 ? "var(--success)" : isLast ? "var(--accent)" : "var(--warn)"}`,
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              fontSize: 16,
-              fontWeight: 700,
-              color: idx === 0 ? "var(--success)" : isLast ? "var(--accent)" : "var(--warn)",
-              flexShrink: 0,
-            }}
+            className={`flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full border-2 text-base font-bold ${badgeStyle}`}
           >
             {idx + 1}
           </div>
-          <span style={{ fontSize: 15, fontWeight: 600, color: "var(--text-secondary)" }}>
+          <span className="text-[15px] font-semibold text-text-secondary">
             Tramo {idx + 1}
             {idx === 0 ? " · Salida" : isLast ? " · Llegada" : " · Conexión"}
           </span>
           {total > 2 && (
             <button
+              type="button"
               onClick={onRemove}
-              style={{
-                marginLeft: "auto",
-                background: "transparent",
-                border: "none",
-                color: "var(--error)",
-                fontSize: 18,
-                padding: "4px 8px",
-                fontWeight: 600,
-              }}
+              className="ml-auto border-none bg-transparent px-2 py-1 text-lg font-semibold text-error"
             >
               ✕
             </button>
@@ -105,7 +83,7 @@ export function LegEditor({
             placeholder="CCS"
             required
           />
-          <div style={{ paddingBottom: 8, color: "var(--accent)", fontSize: 22, fontWeight: 700 }}>→</div>
+          <div className="pb-2 text-[22px] font-bold text-accent">→</div>
           <InputField
             small
             label="Destino"
@@ -125,13 +103,7 @@ export function LegEditor({
           </div>
         </div>
 
-        <div
-          style={{
-            display: "grid",
-            gridTemplateColumns: "repeat(auto-fit, minmax(120px, 1fr))",
-            gap: "var(--space-md)",
-          }}
-        >
+        <div className="grid grid-cols-[repeat(auto-fit,minmax(120px,1fr))] gap-3 items-start">
           <InputField
             small
             label="Fecha de vuelo"
@@ -153,15 +125,8 @@ export function LegEditor({
             onChange={(v) => onChange("timeArrival", String(v))}
             type="time"
           />
-          <div
-            style={{
-              display: "flex",
-              gap: "var(--space-md)",
-              alignItems: "flex-end",
-              flexWrap: "wrap",
-            }}
-          >
-            <div style={{ flex: "1 1 80px", minWidth: 80 }}>
+          <div className="flex flex-wrap items-end gap-3">
+            <div className="min-w-[80px] flex-1 basis-[80px]">
               <InputField
                 small
                 label="Precio tramo"
@@ -178,47 +143,35 @@ export function LegEditor({
               onChange={(v) => onChange("currency", v)}
             />
           </div>
-          <div style={{ display: "flex", flexDirection: "column", gap: "var(--space-xs)" }}>
-            <label
-              style={{
-                fontSize: "var(--label-size)",
-                fontWeight: "var(--label-weight)",
-                color: "var(--text-secondary)",
-              }}
-            >
+          <div className="flex flex-col gap-1.5">
+            <label className="text-sm font-semibold text-text-secondary">
               Horas de vuelo
               {hasBothTimes ? (
-                <span style={{ marginLeft: 6, fontWeight: 500, color: "var(--text-muted)" }}>
+                <span className="ml-1.5 font-medium text-text-muted">
                   (calculado)
                 </span>
               ) : (
-                <span style={{ color: "var(--error)" }}> *</span>
+                <span className="text-error"> *</span>
               )}
             </label>
             <input
               type="number"
               value={leg.flightHours}
-              onChange={(e) => onChange("flightHours", parseFloat(e.target.value) || 0)}
+              onChange={(e) =>
+                onChange("flightHours", parseFloat(e.target.value) || 0)
+              }
               placeholder="3.5"
               min={0}
               step={0.5}
               readOnly={hasBothTimes}
-              style={{
-                background: hasBothTimes ? "var(--bg)" : "var(--bg-card)",
-                border: "2px solid var(--border)",
-                borderRadius: "var(--radius-sm)",
-                padding: "12px 14px",
-                color: "var(--text-primary)",
-                fontSize: "var(--input-font)",
-                outline: "none",
-                width: "100%",
-                cursor: hasBothTimes ? "default" : "text",
-              }}
+              className={`w-full rounded-sm border-2 border-border px-3.5 py-3 text-base text-text-primary outline-none ${
+                hasBothTimes ? "cursor-default bg-bg" : "bg-bg-card"
+              }`}
             />
           </div>
         </div>
 
-        <div style={{ marginTop: "var(--space-md)" }}>
+        <div className="mt-3">
           <InputField
             small
             label="Notas del tramo"

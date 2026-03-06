@@ -21,31 +21,12 @@ export function ConfigBar({
   setExchangeRate: (r: number) => void;
 }) {
   return (
-    <div
-      className="glass"
-      style={{
-        width: "100%",
-        padding: "var(--card-padding)",
-        marginBottom: "var(--space-xl)",
-        display: "flex",
-        flexWrap: "wrap",
-        justifyContent: "space-between",
-        alignItems: "flex-end",
-        gap: "var(--space-2xl)",
-      }}
-    >
-      <div style={{ minWidth: 0, flex: "1 1 200px" }}>
-        <div
-          style={{
-            fontSize: "var(--section-title-size)",
-            fontWeight: "var(--section-title-weight)",
-            color: "var(--text-secondary)",
-            marginBottom: "var(--space-sm)",
-          }}
-        >
+    <div className="glass mb-5 flex w-full flex-wrap items-end justify-between gap-6 p-5">
+      <div className="min-w-0 flex-1 basis-[200px]">
+        <div className="mb-2 text-sm font-bold text-text-secondary">
           Prioridad
         </div>
-        <div style={{ display: "flex", gap: "var(--space-md)", flexWrap: "wrap" as const }}>
+        <div className="flex flex-wrap gap-3">
           {PRIORITY_OPTIONS.map((opt) => (
             <button
               key={opt.value}
@@ -53,51 +34,26 @@ export function ConfigBar({
               aria-label={`Prioridad: ${opt.label}`}
               aria-pressed={priority === opt.value}
               onClick={() => setPriority(opt.value as Priority)}
-              style={{
-                background: priority === opt.value ? "var(--accent)" : "var(--bg)",
-                border: `2px solid ${priority === opt.value ? "var(--accent)" : "var(--border)"}`,
-                borderRadius: "var(--radius-sm)",
-                padding: "var(--btn-padding-y) var(--btn-padding-x)",
-                fontSize: 15,
-                fontWeight: "var(--label-weight)",
-                color: priority === opt.value ? "#fff" : "var(--text-secondary)",
-              }}
+              className={`rounded-sm border-2 px-5 py-3 text-[15px] font-semibold ${
+                priority === opt.value
+                  ? "border-accent bg-accent text-white"
+                  : "border-border bg-bg text-text-secondary"
+              }`}
             >
               {opt.label}
             </button>
           ))}
         </div>
       </div>
-      <div
-        style={{
-          display: "flex",
-          flexWrap: "wrap",
-          gap: "var(--space-2xl)",
-          alignItems: "flex-end",
-          justifyContent: "flex-end",
-        }}
-      >
-        <div style={{ display: "flex", flexDirection: "column" as const, gap: "var(--space-sm)", minWidth: 90 }}>
-          <div
-            style={{
-              fontSize: "var(--section-title-size)",
-              fontWeight: "var(--section-title-weight)",
-              color: "var(--text-secondary)",
-            }}
-          >
+      <div className="flex flex-wrap items-end justify-end gap-6">
+        <div className="flex min-w-[90px] flex-col gap-2">
+          <div className="text-sm font-bold text-text-secondary">
             Ver en
           </div>
           <CurrencyToggle value={displayCurrency} onChange={setDisplayCurrency} />
         </div>
-        <div style={{ minWidth: 140 }}>
-          <div
-            style={{
-              fontSize: "var(--section-title-size)",
-              fontWeight: "var(--section-title-weight)",
-              color: "var(--text-secondary)",
-              marginBottom: "var(--space-sm)",
-            }}
-          >
+        <div className="min-w-[140px]">
+          <div className="mb-2 text-sm font-bold text-text-secondary">
             Tasa 1 USD = CAD
           </div>
           <InputField

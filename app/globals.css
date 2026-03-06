@@ -1,0 +1,7 @@
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { background: #060e17; color: #c8ddd5; }
+input::-webkit-inner-spin-button { -webkit-appearance: none; }
+input::placeholder { color: #2a4a3a; }
+select option { background: #0a1520; }
+button { cursor: pointer; transition: opacity 0.15s; border: none; }
+button:hover { opacity: 0.82; }

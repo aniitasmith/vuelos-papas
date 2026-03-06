@@ -18,19 +18,33 @@ export function Pill({
   return (
     <span
       style={{
-        background: green ? "#0d2e1f" : warn ? "#2e1f0d" : accent ? "#1a2d3a" : "#141e2b",
-        border: green
-          ? "1px solid #00c48c44"
+        background: green
+          ? "var(--success-bg)"
           : warn
-            ? "1px solid #f5a62344"
+            ? "var(--warn-bg)"
             : accent
-              ? "1px solid #4a7a9b44"
-              : "1px solid #1e2d3d",
-        color: dim ? "#4a6a5a" : green ? "#00c48c" : warn ? "#f5a623" : accent ? "#7abcd6" : "#9ab",
-        borderRadius: 20,
-        padding: "3px 10px",
-        fontSize: 11,
-        fontFamily: "'Courier Prime', monospace",
+              ? "#dbeafe"
+              : "#f1f5f9",
+        border: green
+          ? "2px solid var(--success)"
+          : warn
+            ? "2px solid var(--warn)"
+            : accent
+              ? "2px solid var(--accent)"
+              : "2px solid var(--border)",
+        color: dim
+          ? "var(--text-muted)"
+          : green
+            ? "var(--success)"
+            : warn
+              ? "var(--warn)"
+              : accent
+                ? "var(--accent)"
+                : "var(--text-secondary)",
+        borderRadius: 999,
+        padding: "6px 14px",
+        fontSize: 14,
+        fontWeight: 600,
         whiteSpace: "nowrap" as const,
       }}
     >

@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { upsertDomestic, deleteDomestic } from "@/lib/kv";
+import { getData, upsertDomestic, deleteDomestic } from "@/lib/kv";
 import { domesticSchema } from "@/lib/validations";
 import { Domestic } from "@/lib/types";
 
@@ -30,6 +30,11 @@ export async function DELETE(req: Request) {
     const id = typeof body?.id === "string" ? body.id : null;
     if (!id) {
       return NextResponse.json({ error: "Falta el id del trayecto nacional" }, { status: 400 });
+    }
+    const data = await getData();
+    const exists = data.domestics.some((d) => d.id === id);
+    if (!exists) {
+      return NextResponse.json({ error: "Trayecto nacional no encontrado" }, { status: 404 });
     }
     return NextResponse.json(await deleteDomestic(id));
   } catch (e) {

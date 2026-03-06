@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { upsertRoute, deleteRoute } from "@/lib/kv";
+import { getData, upsertRoute, deleteRoute } from "@/lib/kv";
 import { routeSchema } from "@/lib/validations";
 import { Route } from "@/lib/types";
 
@@ -30,6 +30,11 @@ export async function DELETE(req: Request) {
     const id = typeof body?.id === "string" ? body.id : null;
     if (!id) {
       return NextResponse.json({ error: "Falta el id de la ruta" }, { status: 400 });
+    }
+    const data = await getData();
+    const exists = data.routes.some((r) => r.id === id);
+    if (!exists) {
+      return NextResponse.json({ error: "Ruta no encontrada" }, { status: 404 });
     }
     return NextResponse.json(await deleteRoute(id));
   } catch (e) {

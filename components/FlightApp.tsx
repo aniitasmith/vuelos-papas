@@ -1,34 +1,26 @@
 "use client";
 
-import { useState, useMemo, useCallback, useEffect } from "react";
-import { AppData, Route, Leg, Domestic, Currency } from "@/lib/types";
-import {
-  toCAD,
-  fmt,
-  now,
-  emptyLeg,
-  emptyRoute,
-  emptyDomestic,
-  routeTotalCAD,
-  routeTotalHours,
-  routeStops,
-  WEIGHTS,
-} from "@/lib/flightUtils";
+import { useState, useEffect, useCallback, useRef } from "react";
+import { AppData, Currency, Priority } from "@/lib/types";
+import { fmt, emptyRoute, emptyDomestic } from "@/lib/flightUtils";
+import { useRoutes } from "@/hooks/useFlightApp";
+import { useDomestics } from "@/hooks/useFlightApp";
+import { useScoredRoutes } from "@/hooks/useFlightApp";
+import { usePersist } from "@/hooks/useFlightApp";
 import { ConfigBar } from "./ConfigBar";
 import { DomesticForm } from "./DomesticForm";
 import { RouteForm } from "./RouteForm";
 import { RouteCard } from "./RouteCard";
+import { SaveNotification } from "./ui/SaveNotification";
 
 const DEFAULT_EXCHANGE_RATE = 1.39;
+const MAX_ROUTES = 20;
+const MAX_LEGS_PER_ROUTE = 10;
 
 export default function FlightApp({ initialData }: { initialData: AppData }) {
-  const [routes, setRoutes] = useState<Route[]>(
-    initialData.routes?.length ? initialData.routes : [emptyRoute()]
+  const [priority, setPriority] = useState<Priority>(
+    (initialData.priority as Priority) ?? "price"
   );
-  const [domestics, setDomestics] = useState<Domestic[]>(
-    initialData.domestics?.length ? initialData.domestics : [emptyDomestic()]
-  );
-  const [priority, setPriority] = useState(initialData.priority ?? "price");
   const [displayCurrency, setDisplayCurrency] = useState<Currency>(
     initialData.displayCurrency ?? "USD"
   );
@@ -38,13 +30,49 @@ export default function FlightApp({ initialData }: { initialData: AppData }) {
       : DEFAULT_EXCHANGE_RATE
   );
   const [showForm, setShowForm] = useState(true);
-  const [saveStatus, setSaveStatus] = useState<
-    "idle" | "saving" | "saved" | "error"
+  const [showDomesticSection, setShowDomesticSection] = useState(true);
+  const [configSaveStatus, setConfigSaveStatus] = useState<
+    "idle" | "pending" | "saving" | "saved" | "error"
   >("idle");
-  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [configErrorMessage, setConfigErrorMessage] = useState<string | null>(
+    null
+  );
+  const configSavingDelayRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const {
+    routes,
+    setRoutes,
+    updateRoute,
+    updateLeg,
+    addLeg,
+    removeLeg,
+    reorderLegs,
+    addRoute,
+  } = useRoutes(initialData.routes ?? []);
+
+  const { domestics, setDomestics, updateDomestic, addDomestic } = useDomestics(
+    initialData.domestics ?? []
+  );
+
+  const { persist, saveStatus, errorMessage, saveContext } = usePersist(
+    setRoutes,
+    setDomestics
+  );
+
+  const scored = useScoredRoutes(routes, domestics, priority, exchangeRate);
+
+  const CONFIG_SAVING_DELAY_MS = 400;
 
   useEffect(() => {
     const t = setTimeout(() => {
+      setConfigErrorMessage(null);
+      setConfigSaveStatus("pending");
+      if (configSavingDelayRef.current) clearTimeout(configSavingDelayRef.current);
+      configSavingDelayRef.current = setTimeout(() => {
+        configSavingDelayRef.current = null;
+        setConfigSaveStatus("saving");
+      }, CONFIG_SAVING_DELAY_MS);
+
       fetch("/api/data", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -53,205 +81,113 @@ export default function FlightApp({ initialData }: { initialData: AppData }) {
           displayCurrency,
           exchangeRateUSDToCAD: exchangeRate,
         }),
-      }).catch(() => {});
+      })
+        .then(async (res) => {
+          if (configSavingDelayRef.current) {
+            clearTimeout(configSavingDelayRef.current);
+            configSavingDelayRef.current = null;
+          }
+          const data = await res.json().catch(() => ({}));
+          if (!res.ok) {
+            const msg =
+              typeof data?.error === "string"
+                ? data.error
+                : "Error al guardar la configuración.";
+            setConfigErrorMessage(msg);
+            setConfigSaveStatus("error");
+            setTimeout(() => {
+              setConfigSaveStatus("idle");
+              setConfigErrorMessage(null);
+            }, 4000);
+            return;
+          }
+          setConfigSaveStatus("saved");
+          setTimeout(() => setConfigSaveStatus("idle"), 2000);
+        })
+        .catch(() => {
+          if (configSavingDelayRef.current) {
+            clearTimeout(configSavingDelayRef.current);
+            configSavingDelayRef.current = null;
+          }
+          setConfigErrorMessage("Error de red al guardar configuración.");
+          setConfigSaveStatus("error");
+          setTimeout(() => {
+            setConfigSaveStatus("idle");
+            setConfigErrorMessage(null);
+          }, 4000);
+        });
     }, 600);
-    return () => clearTimeout(t);
+    return () => {
+      clearTimeout(t);
+      if (configSavingDelayRef.current) {
+        clearTimeout(configSavingDelayRef.current);
+        configSavingDelayRef.current = null;
+      }
+    };
   }, [priority, displayCurrency, exchangeRate]);
 
-  const persist = useCallback(
-    async (endpoint: string, method: string, body: unknown) => {
-      setSaveStatus("saving");
-      setErrorMessage(null);
-      try {
-        const res = await fetch(endpoint, {
-          method,
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(body),
-        });
-        const data = await res.json().catch(() => ({}));
-        if (!res.ok) {
-          const msg =
-            typeof data?.error === "string"
-              ? data.error
-              : "Error al guardar. Revisá los datos.";
-          setErrorMessage(msg);
-          setSaveStatus("error");
-          setTimeout(() => {
-            setSaveStatus("idle");
-            setErrorMessage(null);
-          }, 4000);
-          return;
-        }
-        setRoutes(
-          (data as AppData).routes?.length
-            ? (data as AppData).routes
-            : [emptyRoute()]
-        );
-        setDomestics(
-          (data as AppData).domestics?.length
-            ? (data as AppData).domestics
-            : [emptyDomestic()]
-        );
-        setSaveStatus("saved");
-        setTimeout(() => setSaveStatus("idle"), 2000);
-      } catch {
-        setErrorMessage("Error de red. ¿Tenés conexión?");
-        setSaveStatus("error");
-        setTimeout(() => {
-          setSaveStatus("idle");
-          setErrorMessage(null);
-        }, 4000);
-      }
-    },
-    []
-  );
-
-  const updateRoute = (routeId: string, field: keyof Route, value: string | undefined) =>
-    setRoutes((rs) =>
-      rs.map((r) =>
-        r.id === routeId ? { ...r, [field]: value, updatedAt: now() } : r
-      )
-    );
-
-  const updateLeg = (
-    routeId: string,
-    legId: string,
-    field: keyof Leg,
-    value: string | number
-  ) =>
-    setRoutes((rs) =>
-      rs.map((r) =>
-        r.id !== routeId
-          ? r
-          : {
-              ...r,
-              updatedAt: now(),
-              legs: r.legs.map((l) =>
-                l.id === legId ? { ...l, [field]: value } : l
-              ),
-            }
-      )
-    );
-
-  const addLeg = (routeId: string) =>
-    setRoutes((rs) =>
-      rs.map((r) =>
-        r.id !== routeId
-          ? r
-          : { ...r, updatedAt: now(), legs: [...r.legs, emptyLeg()] }
-      )
-    );
-
-  const removeLeg = (routeId: string, legId: string) =>
-    setRoutes((rs) =>
-      rs.map((r) =>
-        r.id !== routeId
-          ? r
-          : {
-              ...r,
-              updatedAt: now(),
-              legs: r.legs.filter((l) => l.id !== legId),
-            }
-      )
-    );
-
-  const updateDomestic = (
-    id: string,
-    field: keyof Domestic,
-    value: string | number
-  ) =>
-    setDomestics((ds) =>
-      ds.map((d) =>
-        d.id === id ? { ...d, [field]: value, updatedAt: now() } : d
-      )
-    );
-
-  const getDomesticForRoute = (route: Route): Domestic | null => {
-    if (route.domesticId) {
-      const d = domestics.find((x) => x.id === route.domesticId);
-      if (d) return d;
-    }
-    return domestics[0] ?? null;
-  };
-
-  const scored = useMemo(() => {
-    const valid = routes.filter((r) =>
-      r.legs.some((l) => l.price && parseFloat(String(l.price)) > 0)
-    );
-    if (!valid.length) return [];
-
-    const combined = valid.map((r) => {
-      const dom = getDomesticForRoute(r);
-      const flightCAD = routeTotalCAD(r, exchangeRate);
-      const domCAD = dom?.price
-        ? toCAD(dom.price, dom.currency, exchangeRate)
-        : 0;
-      return {
-        route: r,
-        domestic: dom,
-        totalCAD: flightCAD + domCAD,
-        totalHours: routeTotalHours(r),
-        stops: routeStops(r),
-      };
-    });
-
-    const prices = combined.map((c) => c.totalCAD);
-    const stops = combined.map((c) => c.stops);
-    const hours = combined.map((c) => c.totalHours);
-    const norm = (v: number, min: number, max: number) =>
-      max === min ? 1 : 1 - (v - min) / (max - min);
-    const w = WEIGHTS[priority] ?? WEIGHTS.price;
-    const [minP, maxP] = [Math.min(...prices), Math.max(...prices)];
-    const [minS, maxS] = [Math.min(...stops), Math.max(...stops)];
-    const [minH, maxH] = [Math.min(...hours), Math.max(...hours)];
-
-    return combined
-      .map((c) => ({
-        ...c,
-        score: Math.round(
-          (norm(c.totalCAD, minP, maxP) * w.price +
-            norm(c.stops, minS, maxS) * w.stops +
-            norm(c.totalHours, minH, maxH) * w.duration) *
-            100
-        ),
-      }))
-      .sort((a, b) => b.score - a.score);
-  }, [routes, domestics, priority, exchangeRate]);
+  const effectiveSaveStatus =
+    saveStatus !== "idle" ? saveStatus : configSaveStatus;
+  const effectiveErrorMessage = errorMessage ?? configErrorMessage;
+  const effectiveSaveContext: "route" | "domestic" | "config" | null =
+    saveStatus !== "idle" ? saveContext : configSaveStatus !== "idle" ? "config" : null;
 
   return (
     <div
       style={{
         minHeight: "100vh",
-        background: "#060e17",
-        color: "#c8ddd5",
-        padding: "28px 16px",
+        padding: "28px var(--page-padding)",
+        width: "100%",
+        boxSizing: "border-box",
       }}
     >
-      <div style={{ maxWidth: 900, margin: "0 auto" }}>
-        <div style={{ textAlign: "center", marginBottom: 28 }}>
+      <SaveNotification
+        status={effectiveSaveStatus}
+        errorMessage={effectiveErrorMessage}
+        context={effectiveSaveContext}
+      />
+      <div
+        style={{
+          width: "100%",
+          maxWidth: "var(--max-width)",
+          margin: "0 auto",
+        }}
+      >
+        <div
+          style={{
+            textAlign: "center",
+            marginBottom: "var(--space-2xl)",
+          }}
+        >
           <div
             style={{
-              fontSize: 11,
-              color: "#00c48c",
-              letterSpacing: 3,
-              fontFamily: "'Courier Prime', monospace",
-              marginBottom: 6,
+              fontSize: 16,
+              color: "var(--accent)",
+              fontWeight: 700,
+              marginBottom: 8,
             }}
           >
-            COMPARADOR DE RUTAS
+            Comparador de rutas
           </div>
           <h1
             style={{
-              fontFamily: "'Playfair Display', serif",
-              fontSize: 32,
+              fontSize: 36,
               margin: 0,
-              color: "#e8f4f0",
+              color: "var(--text-primary)",
+              fontWeight: 800,
             }}
           >
-            ✈️ Vuelos para mis papás
+            ✈️ Vuelos para papás
           </h1>
-          <p style={{ color: "#4a7a6a", marginTop: 6, fontSize: 13 }}>
-            Venezuela → Caracas (CCS) → Toronto (YYZ)
+          <p
+            style={{
+              color: "var(--text-secondary)",
+              marginTop: "var(--space-md)",
+              fontSize: 18,
+              fontWeight: "var(--label-weight)",
+            }}
+          >
+            Caracas (CCS) → Toronto (YYZ)
           </p>
         </div>
 
@@ -262,8 +198,6 @@ export default function FlightApp({ initialData }: { initialData: AppData }) {
           setDisplayCurrency={setDisplayCurrency}
           exchangeRate={exchangeRate}
           setExchangeRate={setExchangeRate}
-          saveStatus={saveStatus}
-          errorMessage={errorMessage}
         />
 
         <div
@@ -271,29 +205,31 @@ export default function FlightApp({ initialData }: { initialData: AppData }) {
             display: "flex",
             justifyContent: "space-between",
             alignItems: "center",
-            marginBottom: 14,
+            marginBottom: "var(--space-lg)",
           }}
         >
           <h2
             style={{
-              fontFamily: "'Playfair Display', serif",
-              color: "#e8f4f0",
+              color: "var(--text-primary)",
               margin: 0,
-              fontSize: 20,
+              fontSize: 24,
+              fontWeight: 800,
             }}
           >
             Ingresar opciones
           </h2>
           <button
+            type="button"
             onClick={() => setShowForm((s) => !s)}
+            aria-label={showForm ? "Ocultar formulario de opciones" : "Mostrar formulario de opciones"}
             style={{
-              background: "transparent",
-              border: "1px solid #1e2d3d",
-              borderRadius: 8,
-              padding: "5px 12px",
-              color: "#4a9e7f",
-              fontSize: 12,
-              fontFamily: "'Courier Prime', monospace",
+              background: "var(--bg-card)",
+              border: "2px solid var(--border)",
+              borderRadius: "var(--radius-sm)",
+              padding: "var(--btn-padding-y) var(--btn-padding-x)",
+              color: "var(--accent)",
+              fontSize: 16,
+              fontWeight: "var(--label-weight)",
             }}
           >
             {showForm ? "▲ Ocultar" : "▼ Mostrar"}
@@ -305,17 +241,20 @@ export default function FlightApp({ initialData }: { initialData: AppData }) {
             <DomesticForm
               domestics={domestics}
               onUpdate={updateDomestic}
-              onAdd={() => setDomestics((ds) => [...ds, emptyDomestic()])}
+              onAdd={addDomestic}
               onSave={(d) => persist("/api/domestic", "POST", d)}
               onDelete={(id) => persist("/api/domestic", "DELETE", { id })}
+              expanded={showDomesticSection}
+              onToggleCollapse={() => setShowDomesticSection((s) => !s)}
             />
 
             <div
               style={{
+                width: "100%",
                 display: "flex",
                 flexDirection: "column" as const,
-                gap: 16,
-                marginBottom: 20,
+                gap: "var(--space-lg)",
+                marginBottom: "var(--space-xl)",
               }}
             >
               {routes.map((route) => (
@@ -333,47 +272,69 @@ export default function FlightApp({ initialData }: { initialData: AppData }) {
                   }
                   onAddLeg={() => addLeg(route.id)}
                   onRemoveLeg={(legId) => removeLeg(route.id, legId)}
+                  onReorderLegs={(fromIndex: number, toIndex: number) =>
+                    reorderLegs(route.id, fromIndex, toIndex)
+                  }
                   onSave={(r) => persist("/api/flights", "POST", r)}
                   onDelete={() =>
                     persist("/api/flights", "DELETE", { id: route.id })
                   }
                   canDelete={routes.length > 1}
+                  canAddLeg={route.legs.length < MAX_LEGS_PER_ROUTE}
+                  maxLegsPerRoute={MAX_LEGS_PER_ROUTE}
                 />
               ))}
 
-              <button
-                onClick={() => setRoutes((rs) => [...rs, emptyRoute()])}
-                style={{
-                  background: "transparent",
-                  border: "2px dashed #1e3d2d",
-                  borderRadius: 14,
-                  padding: 14,
-                  color: "#00c48c",
-                  fontSize: 13,
-                  fontFamily: "'Courier Prime', monospace",
-                }}
-              >
-                + Agregar otra ruta
-              </button>
+              {routes.length >= MAX_ROUTES ? (
+                <p
+                  style={{
+                    padding: "var(--space-md) var(--space-xl)",
+                    color: "var(--text-muted)",
+                    fontSize: 15,
+                    fontWeight: 600,
+                    margin: 0,
+                  }}
+                >
+                  Máximo {MAX_ROUTES} rutas. Eliminá una para agregar otra.
+                </p>
+              ) : (
+                <button
+                  type="button"
+                  onClick={addRoute}
+                  aria-label="Agregar otra ruta"
+                  style={{
+                    background: "#dbeafe",
+                    border: "2px dashed var(--accent)",
+                    borderRadius: "var(--radius-md)",
+                    padding: "var(--space-xl)",
+                    color: "var(--accent)",
+                    fontSize: 18,
+                    fontWeight: 700,
+                  }}
+                >
+                  + Agregar otra ruta
+                </button>
+              )}
             </div>
           </>
         )}
 
         {scored.length > 0 && (
-          <div>
+          <div style={{ width: "100%" }}>
             <div
               style={{
-                borderTop: "1px solid #1e2d3d",
-                paddingTop: 20,
-                marginBottom: 16,
+                width: "100%",
+                borderTop: "2px solid var(--border)",
+                paddingTop: "var(--space-2xl)",
+                marginBottom: "var(--space-xl)",
               }}
             >
               <h2
                 style={{
-                  fontFamily: "'Playfair Display', serif",
-                  color: "#e8f4f0",
+                  color: "var(--text-primary)",
                   margin: 0,
-                  fontSize: 22,
+                  fontSize: 26,
+                  fontWeight: 800,
                 }}
               >
                 🏆 Ranking de rutas
@@ -381,41 +342,41 @@ export default function FlightApp({ initialData }: { initialData: AppData }) {
             </div>
 
             <div
+              className="glass"
               style={{
-                background: "linear-gradient(135deg,#002a1a,#001a2a)",
-                border: "1px solid #00c48c44",
-                borderRadius: 14,
-                padding: "14px 20px",
-                marginBottom: 16,
+                width: "100%",
+                background: "var(--success-bg)",
+                border: "3px solid var(--success)",
+                padding: "var(--card-padding)",
+                marginBottom: "var(--space-xl)",
+                boxSizing: "border-box",
               }}
             >
               <div
                 style={{
-                  fontSize: 10,
-                  color: "#4a9e7f",
-                  letterSpacing: 1,
-                  fontFamily: "'Courier Prime', monospace",
+                  fontSize: "var(--section-title-size)",
+                  color: "var(--success)",
+                  fontWeight: "var(--section-title-weight)",
                 }}
               >
-                RECOMENDACIÓN
+                Recomendación
               </div>
               <div
                 style={{
-                  fontSize: 19,
-                  color: "#e8f4f0",
-                  fontFamily: "'Playfair Display', serif",
-                  fontWeight: 700,
-                  marginTop: 4,
+                  fontSize: 24,
+                  color: "var(--text-primary)",
+                  fontWeight: 800,
+                  marginTop: "var(--space-xs)",
                 }}
               >
                 {scored[0].route.label || "Ruta 1"}
               </div>
               <div
                 style={{
-                  fontSize: 11,
-                  color: "#4a9e7f",
-                  marginTop: 4,
-                  fontFamily: "'Courier Prime', monospace",
+                  fontSize: 16,
+                  color: "var(--text-secondary)",
+                  marginTop: "var(--space-xs)",
+                  fontWeight: "var(--label-weight)",
                 }}
               >
                 {[
@@ -437,9 +398,10 @@ export default function FlightApp({ initialData }: { initialData: AppData }) {
 
             <div
               style={{
+                width: "100%",
                 display: "flex",
                 flexDirection: "column" as const,
-                gap: 12,
+                gap: "var(--space-md)",
               }}
             >
               {scored.map((c, i) => (
@@ -457,30 +419,37 @@ export default function FlightApp({ initialData }: { initialData: AppData }) {
             </div>
 
             <div
+              className="glass"
               style={{
-                marginTop: 20,
-                padding: "12px 16px",
-                background: "#0a1520",
-                borderRadius: 10,
-                border: "1px solid #1e2d3d",
+                width: "100%",
+                marginTop: "var(--space-2xl)",
+                padding: "var(--card-padding)",
+                boxSizing: "border-box",
               }}
             >
               <p
                 style={{
                   margin: 0,
-                  fontSize: 11,
-                  color: "#4a6a5a",
-                  fontFamily: "'Courier Prime', monospace",
-                  lineHeight: 1.9,
+                  fontSize: 16,
+                  color: "var(--text-secondary)",
+                  lineHeight: 1.8,
+                  fontWeight: "var(--label-weight)",
                 }}
               >
-                💱 Tasa: <strong style={{ color: "#4a9e7f" }}>1 USD = {exchangeRate} CAD</strong> ·
-                Actualizala en la barra de arriba.<br />
+                💱 Tasa:{" "}
+                <strong style={{ color: "var(--accent)" }}>
+                  1 USD = {exchangeRate} CAD
+                </strong>{" "}
+                · Actualizala en la barra de arriba.
+                <br />
                 💾 Los datos persisten en la nube — podés volver mañana y seguir
-                comparando.<br />
+                comparando.
+                <br />
                 💡 Para adultos mayores considerá{" "}
-                <strong style={{ color: "#00c48c" }}>🛋️ Comodidad</strong> —
-                menos conexiones = menos estrés.
+                <strong style={{ color: "var(--success)" }}>
+                  🛋️ Comodidad
+                </strong>{" "}
+                — menos conexiones = menos estrés.
               </p>
             </div>
           </div>
@@ -490,9 +459,10 @@ export default function FlightApp({ initialData }: { initialData: AppData }) {
           <div
             style={{
               textAlign: "center",
-              padding: "40px 20px",
-              color: "#2a4a3a",
-              fontFamily: "'Courier Prime', monospace",
+              padding: "48px var(--space-2xl)",
+              color: "var(--text-muted)",
+              fontSize: 18,
+              fontWeight: "var(--label-weight)",
             }}
           >
             ↑ Completá y guardá al menos una ruta con precio para ver el ranking

@@ -13,9 +13,12 @@ export function CurrencyToggle({
     <div
       style={{
         display: "flex",
-        border: "1px solid #1e2d3d",
-        borderRadius: 8,
+        width: "fit-content",
+        minWidth: 100,
+        border: "2px solid var(--border)",
+        borderRadius: "var(--radius-sm)",
         overflow: "hidden",
+        background: "var(--bg-card)",
       }}
     >
       {(["USD", "CAD"] as Currency[]).map((c) => (
@@ -23,12 +26,13 @@ export function CurrencyToggle({
           key={c}
           onClick={() => onChange(c)}
           style={{
-            padding: "5px 12px",
-            fontSize: 11,
-            fontFamily: "'Courier Prime', monospace",
-            background: value === c ? "#00c48c" : "#0a1520",
-            color: value === c ? "#000" : "#4a9e7f",
-            fontWeight: value === c ? 700 : 400,
+            flex: "1 1 0",
+            minWidth: 50,
+            padding: "var(--btn-padding-y) 12px",
+            fontSize: 15,
+            fontWeight: 600,
+            background: value === c ? "var(--accent)" : "transparent",
+            color: value === c ? "#fff" : "var(--text-secondary)",
           }}
         >
           {c}

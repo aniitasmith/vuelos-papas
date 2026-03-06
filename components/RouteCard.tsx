@@ -47,13 +47,16 @@ export function RouteCard({
 
   return (
     <div
+      className="glass"
       style={{
-        background: isTop ? "linear-gradient(135deg,#0f2027,#1a3a2a)" : "#0f1923",
-        border: isTop ? "1.5px solid #00c48c" : "1px solid #1e2d3d",
-        borderRadius: 16,
-        padding: "18px 20px",
+        width: "100%",
+        background: "var(--bg-card)",
+        border: isTop ? "3px solid var(--success)" : "2px solid var(--border)",
+        borderRadius: "var(--radius-md)",
+        padding: "var(--card-padding)",
         position: "relative",
         overflow: "hidden",
+        boxSizing: "border-box",
       }}
     >
       {isTop && (
@@ -62,37 +65,29 @@ export function RouteCard({
             position: "absolute",
             top: 0,
             right: 0,
-            background: "#00c48c",
-            color: "#000",
-            fontSize: 10,
-            fontWeight: 700,
-            padding: "4px 12px",
-            borderBottomLeftRadius: 10,
-            letterSpacing: 1,
-            fontFamily: "'Courier Prime', monospace",
+            background: "var(--success)",
+            color: "#fff",
+            fontSize: "var(--section-title-size)",
+            fontWeight: 800,
+            padding: "var(--space-sm) 18px",
+            borderBottomLeftRadius: "var(--radius-sm)",
           }}
         >
-          MEJOR OPCIÓN
+          Mejor opción
         </div>
       )}
 
-      <div style={{ display: "flex", gap: 16, alignItems: "flex-start" }}>
+      <div style={{ display: "flex", gap: "var(--space-xl)", alignItems: "flex-start" }}>
         <div
           style={{
             display: "flex",
             flexDirection: "column",
             alignItems: "center",
-            gap: 6,
-            minWidth: 50,
+            gap: 8,
+            minWidth: 56,
           }}
         >
-          <span
-            style={{
-              fontSize: rank <= 3 ? 22 : 15,
-              fontFamily: "'Courier Prime', monospace",
-              color: "#888",
-            }}
-          >
+          <span style={{ fontSize: rank <= 3 ? 28 : 18, fontWeight: 700, color: "var(--text-secondary)" }}>
             {rank <= 3 ? medals[rank - 1] : `#${rank}`}
           </span>
           <ScoreBadge score={score} />
@@ -105,40 +100,19 @@ export function RouteCard({
               justifyContent: "space-between",
               alignItems: "flex-start",
               flexWrap: "wrap",
-              gap: 4,
+              gap: 8,
             }}
           >
             <div>
-              <div
-                style={{
-                  fontSize: 18,
-                  fontWeight: 700,
-                  color: "#e8f4f0",
-                  fontFamily: "'Playfair Display', serif",
-                }}
-              >
+              <div style={{ fontSize: 22, fontWeight: 800, color: "var(--text-primary)" }}>
                 {route.label || "Sin nombre"}
               </div>
-              <div
-                style={{
-                  fontSize: 12,
-                  color: "#00c48c",
-                  fontFamily: "'Courier Prime', monospace",
-                  marginTop: 2,
-                  letterSpacing: 1,
-                }}
-              >
+              <div style={{ fontSize: 16, color: "var(--accent)", fontWeight: 600, marginTop: 4 }}>
                 ✈️ {path}
               </div>
             </div>
             {addedDate && (
-              <span
-                style={{
-                  fontSize: 10,
-                  color: "#3a5a4a",
-                  fontFamily: "'Courier Prime', monospace",
-                }}
-              >
+              <span style={{ fontSize: 14, color: "var(--text-muted)", fontWeight: 600 }}>
                 agregado {addedDate}
               </span>
             )}
@@ -198,14 +172,14 @@ export function RouteCard({
           <button
             onClick={() => setExpanded((e) => !e)}
             style={{
-              marginTop: 10,
-              background: "transparent",
-              border: "1px solid #1e2d3d",
-              borderRadius: 8,
-              padding: "4px 12px",
-              color: "#4a9e7f",
-              fontSize: 11,
-              fontFamily: "'Courier Prime', monospace",
+              marginTop: "var(--space-lg)",
+              background: "#dbeafe",
+              border: "2px solid var(--accent)",
+              borderRadius: "var(--radius-sm)",
+              padding: "var(--btn-padding-y) 18px",
+              color: "var(--accent)",
+              fontSize: 15,
+              fontWeight: "var(--label-weight)",
             }}
           >
             {expanded ? "▲ Ocultar detalle" : "▼ Ver detalle de tramos"}
@@ -214,9 +188,9 @@ export function RouteCard({
           {expanded && (
             <div
               style={{
-                marginTop: 12,
-                borderTop: "1px solid #1e2d3d",
-                paddingTop: 12,
+                marginTop: "var(--space-md)",
+                borderTop: "2px solid var(--border)",
+                paddingTop: "var(--space-md)",
               }}
             >
               {route.legs.map((l, i) => (
@@ -225,22 +199,22 @@ export function RouteCard({
                   style={{
                     marginBottom: 10,
                     paddingLeft: 12,
-                    borderLeft: "2px solid #1e3d2d",
+                    borderLeft: "3px solid var(--accent)",
                   }}
                 >
-                  <div
-                    style={{
-                      fontFamily: "'Courier Prime', monospace",
-                      fontSize: 11,
-                      color: "#4a9e7f",
-                      marginBottom: 4,
-                    }}
-                  >
+                  <div style={{ fontSize: 15, fontWeight: 600, color: "var(--accent)", marginBottom: 6 }}>
                     Tramo {i + 1}: {l.origin || "?"} → {l.destination || "?"}
                     {l.airline && (
-                      <span style={{ color: "#6a8a7a" }}> · {l.airline}</span>
+                      <span style={{ color: "var(--text-secondary)" }}> · {l.airline}</span>
                     )}
                   </div>
+                  {(l.date || l.time || l.timeArrival) && (
+                    <div style={{ fontSize: 14, color: "var(--text-secondary)", marginBottom: 6 }}>
+                      📅 {l.date ? new Date(l.date + "T12:00:00").toLocaleDateString("es-VE", { weekday: "short", day: "numeric", month: "short" }) : ""}
+                      {(l.date && (l.time || l.timeArrival)) ? " · " : ""}
+                      {l.time && l.timeArrival ? `🕐 Salida ${l.time} → Llegada ${l.timeArrival}` : l.time ? `🕐 Salida ${l.time}` : l.timeArrival ? `🕐 Llegada ${l.timeArrival}` : ""}
+                    </div>
+                  )}
                   <div
                     style={{
                       display: "flex",
@@ -271,14 +245,7 @@ export function RouteCard({
                     )}
                   </div>
                   {l.notes && (
-                    <div
-                      style={{
-                        marginTop: 4,
-                        fontSize: 11,
-                        color: "#5a7a6a",
-                        fontStyle: "italic",
-                      }}
-                    >
+                    <div style={{ marginTop: 6, fontSize: 14, color: "var(--text-muted)", fontStyle: "italic" }}>
                       {l.notes}
                     </div>
                   )}
@@ -290,17 +257,10 @@ export function RouteCard({
                   style={{
                     marginTop: 8,
                     paddingLeft: 12,
-                    borderLeft: "2px solid #3d2e0a",
+                    borderLeft: "3px solid var(--warn)",
                   }}
                 >
-                  <div
-                    style={{
-                      fontFamily: "'Courier Prime', monospace",
-                      fontSize: 11,
-                      color: "#f5a623",
-                      marginBottom: 4,
-                    }}
-                  >
+                  <div style={{ fontSize: 15, fontWeight: 600, color: "var(--warn)", marginBottom: 6 }}>
                     Nacional: {domestic.cityOrigin || "Ciudad"} → CCS ·{" "}
                     {domestic.transport}
                   </div>
@@ -327,32 +287,19 @@ export function RouteCard({
 
           <div
             style={{
-              marginTop: 14,
-              paddingTop: 10,
-              borderTop: "1px solid #1e2d3d33",
+              marginTop: "var(--space-xl)",
+              paddingTop: "var(--space-lg)",
+              borderTop: "2px solid var(--border)",
               display: "flex",
               justifyContent: "flex-end",
               alignItems: "center",
-              gap: 8,
+              gap: "var(--space-md)",
             }}
           >
-            <span
-              style={{
-                fontFamily: "'Courier Prime', monospace",
-                color: "#6a8a7a",
-                fontSize: 11,
-              }}
-            >
-              TOTAL
+            <span style={{ fontSize: 16, fontWeight: "var(--section-title-weight)", color: "var(--text-secondary)" }}>
+              Total
             </span>
-            <span
-              style={{
-                fontFamily: "'Courier Prime', monospace",
-                color: "#00c48c",
-                fontSize: 20,
-                fontWeight: 700,
-              }}
-            >
+            <span style={{ fontSize: 24, fontWeight: 800, color: "var(--success)" }}>
               {fmt(grandTotalCAD, displayCurrency, exchangeRate)}
             </span>
           </div>

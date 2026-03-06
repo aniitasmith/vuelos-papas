@@ -1,7 +1,145 @@
-* { box-sizing: border-box; margin: 0; padding: 0; }
-body { background: #060e17; color: #c8ddd5; }
-input::-webkit-inner-spin-button { -webkit-appearance: none; }
-input::placeholder { color: #2a4a3a; }
-select option { background: #0a1520; }
-button { cursor: pointer; transition: opacity 0.15s; border: none; }
-button:hover { opacity: 0.82; }
+/* Fondo claro, colores vivos, tipografía amigable */
+:root {
+  --bg: #f8fafc;
+  --bg-card: #ffffff;
+  --border: #e2e8f0;
+  --border-strong: #cbd5e1;
+  --text-primary: #1e293b;
+  --text-secondary: #475569;
+  --text-muted: #64748b;
+  --accent: #2563eb;
+  --accent-hover: #1d4ed8;
+  --success: #16a34a;
+  --success-bg: #dcfce7;
+  --warn: #ea580c;
+  --warn-bg: #ffedd5;
+  --error: #dc2626;
+  --error-bg: #fee2e2;
+  --shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.08);
+  /* Consistencia: espaciado y radios */
+  --max-width: 1400px;
+  --page-padding: 32px;
+  --radius-sm: 12px;
+  --radius-md: 16px;
+  --space-xs: 6px;
+  --space-sm: 8px;
+  --space-md: 12px;
+  --space-lg: 16px;
+  --space-xl: 20px;
+  --space-2xl: 24px;
+  --label-size: 14px;
+  --label-weight: 600;
+  --section-title-size: 14px;
+  --section-title-weight: 700;
+  --input-font: 16px;
+  --btn-padding-y: 12px;
+  --btn-padding-x: 20px;
+  --card-padding: 20px 24px;
+  /** Altura aproximada del header; usada por SaveNotification para no solaparse */
+  --header-height: 72px;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html, body {
+  width: 100%;
+  max-width: 100%;
+  overflow-x: hidden;
+}
+
+body {
+  background: var(--bg);
+  color: var(--text-primary);
+  min-height: 100vh;
+  font-family: var(--font-nunito), system-ui, sans-serif;
+  font-size: 16px;
+  line-height: 1.5;
+}
+
+input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+}
+
+input::placeholder {
+  color: var(--text-muted);
+}
+
+select option {
+  background: #fff;
+  color: var(--text-primary);
+}
+
+button {
+  cursor: pointer;
+  transition: opacity 0.15s, transform 0.1s;
+  border: none;
+  font-family: inherit;
+}
+
+button:hover {
+  opacity: 0.9;
+}
+
+button:active {
+  transform: scale(0.98);
+}
+
+.glass {
+  background: var(--bg-card);
+  border: 2px solid var(--border);
+  box-shadow: var(--shadow-md);
+  border-radius: var(--radius-md);
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.loading-spinner {
+  width: 40px;
+  height: 40px;
+  border: 3px solid var(--border);
+  border-top-color: var(--accent);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes saveNotificationSlide {
+  from {
+    opacity: 0;
+    transform: translateY(-12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.save-notification-enter {
+  animation: saveNotificationSlide 0.25s ease-out;
+}
+
+/** LegEditor: fila Origen → Destino | Aerolínea; en móvil Aerolínea pasa a segunda fila */
+.leg-origin-row {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr minmax(140px, 1fr);
+  gap: var(--space-md);
+  align-items: end;
+  margin-bottom: var(--space-md);
+}
+
+@media (max-width: 640px) {
+  .leg-origin-row {
+    grid-template-columns: 1fr auto 1fr;
+  }
+  .leg-airline-cell {
+    grid-column: 1 / -1;
+  }
+}

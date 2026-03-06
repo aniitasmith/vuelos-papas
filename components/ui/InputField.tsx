@@ -9,6 +9,7 @@ export function InputField({
   min,
   step,
   small,
+  required,
 }: {
   label: string;
   value: string | number;
@@ -18,19 +19,20 @@ export function InputField({
   min?: string;
   step?: string;
   small?: boolean;
+  /** When true, appends * to the label to indicate the field is required */
+  required?: boolean;
 }) {
   return (
-    <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
+    <div style={{ display: "flex", flexDirection: "column", gap: "var(--space-xs)" }}>
       <label
         style={{
-          fontSize: 10,
-          color: "#4a9e7f",
-          letterSpacing: 1,
-          fontFamily: "'Courier Prime', monospace",
-          textTransform: "uppercase" as const,
+          fontSize: "var(--label-size)",
+          fontWeight: "var(--label-weight)",
+          color: "var(--text-secondary)",
         }}
       >
         {label}
+        {required && <span style={{ color: "var(--error)" }}> *</span>}
       </label>
       <input
         type={type}
@@ -42,13 +44,12 @@ export function InputField({
         min={min}
         step={step}
         style={{
-          background: "#060e17",
-          border: "1px solid #1e2d3d",
-          borderRadius: 7,
-          padding: small ? "6px 10px" : "8px 12px",
-          color: "#e8f4f0",
-          fontSize: small ? 13 : 14,
-          fontFamily: "'Courier Prime', monospace",
+          background: "var(--bg-card)",
+          border: "2px solid var(--border)",
+          borderRadius: "var(--radius-sm)",
+          padding: small ? "12px 14px" : "14px 16px",
+          color: "var(--text-primary)",
+          fontSize: "var(--input-font)",
           outline: "none",
           width: "100%",
         }}

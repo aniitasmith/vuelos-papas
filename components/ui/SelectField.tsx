@@ -5,36 +5,37 @@ export function SelectField({
   value,
   onChange,
   options,
+  required,
 }: {
   label: string;
   value: string;
   onChange: (v: string) => void;
   options: string[];
+  /** When true, appends * to the label to indicate the field is required */
+  required?: boolean;
 }) {
   return (
-    <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
+    <div style={{ display: "flex", flexDirection: "column", gap: "var(--space-xs)" }}>
       <label
         style={{
-          fontSize: 10,
-          color: "#4a9e7f",
-          letterSpacing: 1,
-          fontFamily: "'Courier Prime', monospace",
-          textTransform: "uppercase" as const,
+          fontSize: "var(--label-size)",
+          fontWeight: "var(--label-weight)",
+          color: "var(--text-secondary)",
         }}
       >
         {label}
+        {required && <span style={{ color: "var(--error)" }}> *</span>}
       </label>
       <select
         value={value}
         onChange={(e) => onChange(e.target.value)}
         style={{
-          background: "#060e17",
-          border: "1px solid #1e2d3d",
-          borderRadius: 7,
-          padding: "8px 12px",
-          color: "#e8f4f0",
-          fontSize: 14,
-          fontFamily: "'Courier Prime', monospace",
+          background: "var(--bg-card)",
+          border: "2px solid var(--border)",
+          borderRadius: "var(--radius-sm)",
+          padding: "14px 16px",
+          color: "var(--text-primary)",
+          fontSize: "var(--input-font)",
           outline: "none",
           width: "100%",
         }}

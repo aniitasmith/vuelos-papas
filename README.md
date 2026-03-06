@@ -1,4 +1,4 @@
-# ✈️ Vuelos para mis papás
+# ✈️ Vuelos para papás
 
 Comparador de rutas multi-tramo **Venezuela → Caracas (CCS) → Toronto (YYZ)**.  
 Los datos persisten en la nube vía **Vercel KV** (o Redis) — podés volver en cualquier momento.
@@ -41,7 +41,7 @@ npm run dev
 ```
 
 - Abrí el navegador en **http://localhost:3000**.
-- La página principal carga los datos desde la API (y estos desde KV si está configurado).
+- La página principal redirige a **Opciones**; los datos se cargan desde la API (y esta desde KV si está configurado).
 
 ### 5. Build para producción (opcional)
 
@@ -86,7 +86,9 @@ Cada ruta puede tener **N tramos** independientes, cada uno con su precio:
 - Tramo 3: (si hay más escala)
 
 El **total de la ruta** = suma de todos los tramos + trayecto nacional (opcional).  
-Cada ruta puede asociar **un trayecto nacional** (ej. bus a CCS) desde la barra de configuración.
+Cada ruta puede asociar **un trayecto nacional** (ej. bus a CCS) desde el selector en el formulario.
+
+Por tramo podés cargar **fecha de vuelo**, **hora de salida** y **hora de llegada**; si ingresás salida y llegada, las **horas de vuelo** se calculan solas.
 
 ---
 
@@ -95,43 +97,57 @@ Cada ruta puede asociar **un trayecto nacional** (ej. bus a CCS) desde la barra 
 ```
 app/
   api/
-    data/route.ts       # GET/POST settings (prioridad, moneda, tasa USD/CAD)
-    flights/route.ts    # POST/DELETE rutas internacionales
-    domestic/route.ts    # POST/DELETE trayectos nacionales
+    data/route.ts         # GET/POST configuración (prioridad, moneda, tasa USD/CAD)
+    flights/route.ts      # POST/DELETE rutas internacionales
+    domestic/route.ts     # POST/DELETE trayectos nacionales
   layout.tsx
-  page.tsx              # carga datos del KV al abrir
+  page.tsx                # redirige a /opciones
+  opciones/page.tsx       # página principal (carga datos y FlightApp)
+  opciones/loading.tsx    # estado de carga
+  opciones/error.tsx      # error boundary de la página Opciones
+  buscar/page.tsx         # buscador Google Flights
+  error.tsx               # error boundary global
 components/
-  FlightApp.tsx         # orquestador (estado, ranking, persist)
-  ConfigBar.tsx         # prioridad, moneda, tasa de cambio
-  DomesticForm.tsx      # formulario trayectos nacionales
-  RouteForm.tsx         # formulario por ruta (tramos + guardar)
-  RouteCard.tsx         # tarjeta de resultado en el ranking
-  LegEditor.tsx          # editor de un tramo
-  ui/                   # CurrencyToggle, Pill, InputField, SelectField, ScoreBadge, SaveStatus
+  FlightApp.tsx           # orquestador (estado, ranking, persistencia)
+  ConfigBar.tsx           # prioridad, moneda, tasa de cambio
+  DomesticForm.tsx        # trayectos nacionales (sección colapsable)
+  RouteForm.tsx           # formulario por ruta (tramos + guardar)
+  RouteCard.tsx           # tarjeta en el ranking
+  LegEditor.tsx           # editor de un tramo (origen, destino, aerolínea, fecha, horas, precio)
+  Header.tsx              # navegación Opciones / Buscar vuelos
+  GoogleFlightsSearch.tsx # enlace a Google Flights con origen/destino/fechas
+  ui/                     # CurrencyToggle, Pill, InputField, SelectField, ScoreBadge, SaveNotification
+hooks/
+  useFlightApp.ts         # useRoutes, useDomestics, useScoredRoutes, usePersist
 lib/
-  kv.ts                 # helpers Vercel KV
-  types.ts              # Route, Leg, Domestic, AppData
-  flightUtils.ts        # toCAD, fmt, emptyLeg, emptyRoute, scoring
-  validations.ts        # esquemas Zod para las APIs
+  kv.ts                   # helpers Vercel KV + normalización de datos
+  types.ts                # Route, Leg, Domestic, AppData, Priority
+  flightUtils.ts          # toCAD, fmt, emptyLeg, emptyRoute, flightHoursFromTimes, scoring
+  validations.ts          # esquemas Zod para las APIs
 ```
 
 ---
 
 ## 💡 Uso
 
-1. **Trayecto nacional**: agregá cómo llegan a CCS (bus, carro, vuelo interno).
-2. **Rutas**: agregá cada combinación que encontrés, con sus tramos y precios.
-3. En cada ruta podés elegir **qué trayecto nacional** aplica (selector “Trayecto nacional para esta ruta”).
-4. **Tasa USD/CAD**: en la barra superior podés cambiar la tasa (ej. 1.39); se guarda en la configuración.
-5. **💾 Guardar** cada ruta y cada trayecto nacional para que persistan en la nube.
+1. **Trayecto nacional**: agregá cómo llegan a CCS (bus, carro, vuelo interno). La sección se puede colapsar (▲ Ocultar / ▼ Mostrar).
+2. **Rutas**: agregá cada combinación que encontrés, con sus tramos, fechas/horas y precios.
+3. En cada ruta elegí **qué trayecto nacional** aplica (selector “Trayecto nacional para esta ruta”).
+4. **Tasa USD/CAD**: en la barra superior podés cambiar la tasa (ej. 1.39); se guarda automáticamente.
+5. **💾 Guardar** cada ruta y cada trayecto nacional para que persistan en la nube. El estado (Guardando… / Guardado / Error) se muestra como notificación en la esquina superior derecha e indica qué se guardó (ruta, trayecto nacional o configuración).
 6. El **ranking** se calcula según la prioridad elegida (Precio, Comodidad, Tiempo, Balance).
 
 ---
 
 ## 🔧 Comandos útiles
 
-| Comando        | Descripción                    |
-|----------------|--------------------------------|
-| `npm run dev`  | Servidor de desarrollo (hot reload) |
-| `npm run build`| Build de producción            |
-| `npm start`    | Servir build en el puerto 3000 |
+| Comando            | Descripción                        |
+|--------------------|------------------------------------|
+| `npm run dev`      | Servidor de desarrollo (hot reload) |
+| `npm run build`    | Build de producción                |
+| `npm start`        | Servir build en el puerto 3000     |
+| `npm run lint`     | Ejecutar ESLint                    |
+| `npm run format`   | Formatear código con Prettier      |
+| `npm run format:check` | Comprobar formato (sin escribir) |
+| `npm run test`     | Ejecutar tests (Vitest)            |
+| `npm run test:watch` | Tests en modo watch              |

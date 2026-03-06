@@ -8,6 +8,9 @@ export const legSchema = z.object({
   origin: z.string(),
   destination: z.string(),
   airline: z.string(),
+  date: z.string().optional().default(""),
+  time: z.string().optional().default(""),
+  timeArrival: z.string().optional().default(""),
   flightHours: z.number(),
   layoverHours: z.number(),
   price: z.union([z.string(), z.number()]).transform(String),
@@ -37,8 +40,10 @@ export const domesticSchema = z.object({
   updatedAt: z.string(),
 });
 
+const prioritySchema = z.enum(["price", "comfort", "time", "balanced"]);
+
 export const settingsSchema = z.object({
-  priority: z.string().optional(),
+  priority: prioritySchema.optional(),
   displayCurrency: currencySchema.optional(),
   exchangeRateUSDToCAD: z.number().min(0.1).max(3).optional(),
 });

@@ -1,9 +1,8 @@
 "use client";
 
-import type { Currency } from "@/lib/types";
+import type { Currency, Priority } from "@/lib/types";
 import { PRIORITY_OPTIONS } from "@/lib/flightUtils";
 import { CurrencyToggle } from "./ui/CurrencyToggle";
-import { SaveStatus } from "./ui/SaveStatus";
 import { InputField } from "./ui/InputField";
 
 export function ConfigBar({
@@ -13,62 +12,55 @@ export function ConfigBar({
   setDisplayCurrency,
   exchangeRate,
   setExchangeRate,
-  saveStatus,
-  errorMessage,
 }: {
-  priority: string;
-  setPriority: (p: string) => void;
+  priority: Priority;
+  setPriority: (p: Priority) => void;
   displayCurrency: Currency;
   setDisplayCurrency: (c: Currency) => void;
   exchangeRate: number;
   setExchangeRate: (r: number) => void;
-  saveStatus: "idle" | "saving" | "saved" | "error";
-  errorMessage?: string | null;
 }) {
   return (
     <div
+      className="glass"
       style={{
-        background: "#0a1520",
-        border: "1px solid #1e2d3d",
-        borderRadius: 14,
-        padding: "14px 18px",
-        marginBottom: 18,
+        width: "100%",
+        padding: "var(--card-padding)",
+        marginBottom: "var(--space-xl)",
         display: "flex",
-        gap: 16,
-        flexWrap: "wrap" as const,
+        flexWrap: "wrap",
+        justifyContent: "space-between",
         alignItems: "flex-end",
+        gap: "var(--space-2xl)",
       }}
     >
-      <div style={{ flex: 1, minWidth: 200 }}>
+      <div style={{ minWidth: 0, flex: "1 1 200px" }}>
         <div
           style={{
-            fontSize: 10,
-            color: "#4a9e7f",
-            letterSpacing: 1,
-            fontFamily: "'Courier Prime', monospace",
-            marginBottom: 8,
-            textTransform: "uppercase" as const,
+            fontSize: "var(--section-title-size)",
+            fontWeight: "var(--section-title-weight)",
+            color: "var(--text-secondary)",
+            marginBottom: "var(--space-sm)",
           }}
         >
           Prioridad
         </div>
-        <div style={{ display: "flex", gap: 6, flexWrap: "wrap" as const }}>
+        <div style={{ display: "flex", gap: "var(--space-md)", flexWrap: "wrap" as const }}>
           {PRIORITY_OPTIONS.map((opt) => (
             <button
               key={opt.value}
-              onClick={() => setPriority(opt.value)}
+              type="button"
+              aria-label={`Prioridad: ${opt.label}`}
+              aria-pressed={priority === opt.value}
+              onClick={() => setPriority(opt.value as Priority)}
               style={{
-                background: priority === opt.value ? "#00c48c" : "#0f1923",
-                border:
-                  priority === opt.value
-                    ? "1px solid #00c48c"
-                    : "1px solid #1e2d3d",
-                borderRadius: 20,
-                padding: "5px 14px",
-                fontSize: 12,
-                color: priority === opt.value ? "#000" : "#7a9e8e",
-                fontWeight: priority === opt.value ? 700 : 400,
-                fontFamily: "'Courier Prime', monospace",
+                background: priority === opt.value ? "var(--accent)" : "var(--bg)",
+                border: `2px solid ${priority === opt.value ? "var(--accent)" : "var(--border)"}`,
+                borderRadius: "var(--radius-sm)",
+                padding: "var(--btn-padding-y) var(--btn-padding-x)",
+                fontSize: 15,
+                fontWeight: "var(--label-weight)",
+                color: priority === opt.value ? "#fff" : "var(--text-secondary)",
               }}
             >
               {opt.label}
@@ -76,45 +68,50 @@ export function ConfigBar({
           ))}
         </div>
       </div>
-      <div style={{ display: "flex", flexDirection: "column" as const, gap: 5 }}>
-        <div
-          style={{
-            fontSize: 10,
-            color: "#4a9e7f",
-            letterSpacing: 1,
-            fontFamily: "'Courier Prime', monospace",
-            textTransform: "uppercase" as const,
-          }}
-        >
-          Ver en
+      <div
+        style={{
+          display: "flex",
+          flexWrap: "wrap",
+          gap: "var(--space-2xl)",
+          alignItems: "flex-end",
+          justifyContent: "flex-end",
+        }}
+      >
+        <div style={{ display: "flex", flexDirection: "column" as const, gap: "var(--space-sm)", minWidth: 90 }}>
+          <div
+            style={{
+              fontSize: "var(--section-title-size)",
+              fontWeight: "var(--section-title-weight)",
+              color: "var(--text-secondary)",
+            }}
+          >
+            Ver en
+          </div>
+          <CurrencyToggle value={displayCurrency} onChange={setDisplayCurrency} />
         </div>
-        <CurrencyToggle value={displayCurrency} onChange={setDisplayCurrency} />
-      </div>
-      <div style={{ minWidth: 100 }}>
-        <div
-          style={{
-            fontSize: 10,
-            color: "#4a9e7f",
-            letterSpacing: 1,
-            fontFamily: "'Courier Prime', monospace",
-            marginBottom: 6,
-            textTransform: "uppercase" as const,
-          }}
-        >
-          Tasa 1 USD = CAD
+        <div style={{ minWidth: 140 }}>
+          <div
+            style={{
+              fontSize: "var(--section-title-size)",
+              fontWeight: "var(--section-title-weight)",
+              color: "var(--text-secondary)",
+              marginBottom: "var(--space-sm)",
+            }}
+          >
+            Tasa 1 USD = CAD
+          </div>
+          <InputField
+            small
+            type="number"
+            label=""
+            value={exchangeRate}
+            onChange={(v) => setExchangeRate(Number(v) || 1.39)}
+            placeholder="1.39"
+            step="0.01"
+            min="0.1"
+          />
         </div>
-        <InputField
-          small
-          type="number"
-          label=""
-          value={exchangeRate}
-          onChange={(v) => setExchangeRate(Number(v) || 1.39)}
-          placeholder="1.39"
-          step="0.01"
-          min="0.1"
-        />
       </div>
-      <SaveStatus status={saveStatus} errorMessage={errorMessage} />
     </div>
   );
 }

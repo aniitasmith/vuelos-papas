@@ -5,27 +5,42 @@ import { InputField } from "./ui/InputField";
 import { SelectField } from "./ui/SelectField";
 import { CurrencyToggle } from "./ui/CurrencyToggle";
 
+const headerButtonStyle = {
+  background: "var(--bg-card)",
+  border: "2px solid var(--border)",
+  borderRadius: "var(--radius-sm)",
+  padding: "var(--btn-padding-y) var(--btn-padding-x)",
+  color: "var(--warn)",
+  fontSize: 16,
+  fontWeight: "var(--label-weight)" as const,
+};
+
 export function DomesticForm({
   domestics,
   onUpdate,
   onAdd,
   onSave,
   onDelete,
+  expanded = true,
+  onToggleCollapse,
 }: {
   domestics: Domestic[];
   onUpdate: (id: string, field: keyof Domestic, value: string | number) => void;
   onAdd: () => void;
   onSave: (d: Domestic) => void;
   onDelete: (id: string) => void;
+  expanded?: boolean;
+  onToggleCollapse?: () => void;
 }) {
   return (
     <div
+      className="glass"
       style={{
-        background: "#0b1210",
-        border: "1px solid #2d2a1a",
-        borderRadius: 14,
-        padding: 18,
-        marginBottom: 16,
+        width: "100%",
+        padding: "var(--card-padding)",
+        marginBottom: "var(--space-xl)",
+        borderLeft: "4px solid var(--warn)",
+        boxSizing: "border-box",
       }}
     >
       <div
@@ -33,92 +48,96 @@ export function DomesticForm({
           display: "flex",
           justifyContent: "space-between",
           alignItems: "center",
-          marginBottom: 14,
+          marginBottom: expanded ? "var(--space-lg)" : 0,
         }}
       >
         <div>
-          <span
-            style={{
-              fontFamily: "'Courier Prime', monospace",
-              color: "#f5a623",
-              fontWeight: 700,
-            }}
-          >
-            🚌 TRAYECTO NACIONAL · Ciudad → Caracas (CCS)
+          <span style={{ fontSize: 18, color: "var(--warn)", fontWeight: "var(--section-title-weight)" }}>
+            🚌 Trayecto nacional · Ciudad → Caracas (CCS)
           </span>
-          <div style={{ fontSize: 11, color: "#5a4a2a", marginTop: 2 }}>
+          <div style={{ fontSize: 15, color: "var(--text-secondary)", marginTop: "var(--space-xs)" }}>
             Transporte hasta Maiquetía
           </div>
         </div>
-        <button
-          onClick={onAdd}
-          style={{
-            background: "transparent",
-            border: "1px dashed #3d2e0a",
-            borderRadius: 8,
-            padding: "5px 12px",
-            color: "#f5a623",
-            fontSize: 11,
-            fontFamily: "'Courier Prime', monospace",
-          }}
-        >
-          + Opción
-        </button>
+        <div style={{ display: "flex", gap: "var(--space-sm)", alignItems: "center" }}>
+          {expanded && (
+            <button
+              type="button"
+              aria-label="Agregar opción de trayecto nacional"
+              onClick={onAdd}
+              style={{
+                ...headerButtonStyle,
+                background: "var(--warn-bg)",
+                border: "2px dashed var(--warn)",
+              }}
+            >
+              + Opción
+            </button>
+          )}
+          {onToggleCollapse && (
+            <button
+              type="button"
+              aria-label={expanded ? "Ocultar sección trayecto nacional" : "Mostrar sección trayecto nacional"}
+              onClick={onToggleCollapse}
+              style={headerButtonStyle}
+            >
+              {expanded ? "▲ Ocultar" : "▼ Mostrar"}
+            </button>
+          )}
+        </div>
       </div>
 
-      {domestics.map((d, idx) => (
+      {expanded && domestics.map((d, idx) => (
         <div
           key={d.id}
           style={{
-            background: "#060e0a",
-            border: "1px solid #2a2510",
-            borderRadius: 12,
-            padding: 14,
-            marginBottom: 10,
+            background: "var(--bg)",
+            border: "2px solid var(--border)",
+            borderRadius: "var(--radius-md)",
+            padding: "var(--card-padding)",
+            marginBottom: "var(--space-lg)",
           }}
         >
           <div
             style={{
               display: "flex",
               justifyContent: "space-between",
-              marginBottom: 10,
+              marginBottom: "var(--space-lg)",
             }}
           >
-            <span
-              style={{
-                fontFamily: "'Courier Prime', monospace",
-                color: "#f5a623",
-                fontSize: 11,
-              }}
-            >
+            <span style={{ fontSize: 16, color: "var(--warn)", fontWeight: "var(--section-title-weight)" }}>
               Nacional #{idx + 1}
             </span>
-            <div style={{ display: "flex", gap: 8 }}>
+            <div style={{ display: "flex", gap: "var(--space-md)" }}>
               <button
+                type="button"
+                aria-label="Guardar trayecto nacional"
                 onClick={() => onSave(d)}
                 style={{
-                  background: "#0d2e1f",
-                  border: "1px solid #00c48c44",
-                  borderRadius: 6,
-                  padding: "3px 10px",
-                  color: "#00c48c",
-                  fontSize: 11,
-                  fontFamily: "'Courier Prime', monospace",
+                  background: "var(--success-bg)",
+                  border: "2px solid var(--success)",
+                  borderRadius: "var(--radius-sm)",
+                  padding: "var(--btn-padding-y) 18px",
+                  color: "var(--success)",
+                  fontSize: 15,
+                  fontWeight: "var(--label-weight)",
                 }}
               >
                 💾 Guardar
               </button>
               {domestics.length > 1 && (
                 <button
+                  type="button"
+                  aria-label="Eliminar trayecto nacional"
                   onClick={() => onDelete(d.id)}
                   style={{
-                    background: "#1a0a0a",
-                    border: "1px solid #3d1e1e",
-                    borderRadius: 6,
-                    padding: "3px 8px",
-                    color: "#e05c5c",
-                    fontSize: 11,
-                    fontFamily: "'Courier Prime', monospace",
+                    background: "var(--error-bg)",
+                    border: "2px solid var(--error)",
+                    borderRadius: "var(--radius-sm)",
+                    padding: "var(--btn-padding-y) 14px",
+                    color: "var(--error)",
+                    fontSize: 15,
+                    fontWeight: "var(--label-weight)",
                   }}
                 >
                   ✕
@@ -129,8 +148,8 @@ export function DomesticForm({
           <div
             style={{
               display: "grid",
-              gridTemplateColumns: "repeat(auto-fit, minmax(130px, 1fr))",
-              gap: 10,
+              gridTemplateColumns: "repeat(auto-fit, minmax(140px, 1fr))",
+              gap: "var(--space-lg)",
             }}
           >
             <InputField
@@ -139,6 +158,7 @@ export function DomesticForm({
               value={d.label}
               onChange={(v) => onUpdate(d.id, "label", v)}
               placeholder="Bus Mérida-CCS"
+              required
             />
             <InputField
               small
@@ -146,12 +166,14 @@ export function DomesticForm({
               value={d.cityOrigin}
               onChange={(v) => onUpdate(d.id, "cityOrigin", v)}
               placeholder="Mérida"
+              required
             />
             <SelectField
               label="Transporte"
               value={d.transport}
               onChange={(v) => onUpdate(d.id, "transport", v)}
               options={["Bus", "Vuelo interno", "Carro", "Otro"]}
+              required
             />
             <InputField
               small
@@ -163,25 +185,33 @@ export function DomesticForm({
               min="0"
               step="0.5"
             />
-            <div>
-              <InputField
-                small
-                label="Precio"
-                value={d.price}
-                onChange={(v) => onUpdate(d.id, "price", v)}
-                type="number"
-                placeholder="40"
-                min="0"
-              />
-              <div style={{ marginTop: 5 }}>
-                <CurrencyToggle
-                  value={d.currency}
-                  onChange={(v) => onUpdate(d.id, "currency", v)}
+            <div
+              style={{
+                display: "flex",
+                gap: "var(--space-md)",
+                alignItems: "flex-end",
+                flexWrap: "wrap",
+              }}
+            >
+              <div style={{ flex: "1 1 80px", minWidth: 80 }}>
+                <InputField
+                  small
+                  label="Precio"
+                  value={d.price}
+                  onChange={(v) => onUpdate(d.id, "price", v)}
+                  type="number"
+                  placeholder="40"
+                  min="0"
+                  required
                 />
               </div>
+              <CurrencyToggle
+                value={d.currency}
+                onChange={(v) => onUpdate(d.id, "currency", v)}
+              />
             </div>
           </div>
-          <div style={{ marginTop: 10 }}>
+          <div style={{ marginTop: "var(--space-md)" }}>
             <InputField
               small
               label="Notas"
